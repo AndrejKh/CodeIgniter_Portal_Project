@@ -1,124 +1,7 @@
-<?php
-
-$categories = array(
-	'uu-studies' => array(
-		'youthcohort' => array(
-			'grp-some-group1' => array(
-				'description' => 'Some group description 1',
-				'users' => array(
-					'mgr1-2' => array(
-						'isManager' => true,
-					),
-					'usr1-1' => array(
-						'isManager' => false,
-					),
-					'chrisdm' => array(
-						'isManager' => true,
-					),
-					'mgr1-1' => array(
-						'isManager' => true,
-					),
-					'usr1-2' => array(
-						'isManager' => false,
-					),
-				),
-			),
-			'grp-some-group2' => array(
-				'description' => 'Some group description 2',
-				'users' => array(
-					'mgr2-1' => array(
-						'isManager' => true,
-					),
-					'mgr2-2' => array(
-						'isManager' => true,
-					),
-					'usr2-1' => array(
-						'isManager' => false,
-					),
-					'usr2-2' => array(
-						'isManager' => false,
-					),
-				),
-			),
-			'grp-some-group3' => array(
-				'description' => 'Some group description 3',
-				'users' => array(
-					'mgr3-1' => array(
-						'isManager' => true,
-					),
-					'mgr3-2' => array(
-						'isManager' => true,
-					),
-					'usr3-1' => array(
-						'isManager' => false,
-					),
-					'usr3-2' => array(
-						'isManager' => false,
-					),
-				),
-			),
-		),
-		'vijfmaanden' => array(
-			'grp-some-group4' => array(
-				'description' => 'Some group description 4',
-				'users' => array(
-					'mgr4-1' => array(
-						'isManager' => true,
-					),
-					'mgr4-2' => array(
-						'isManager' => true,
-					),
-					'usr4-1' => array(
-						'isManager' => false,
-					),
-					'usr4-2' => array(
-						'isManager' => false,
-					),
-				),
-			),
-		),
-	),
-	'food-studies' => array(
-		'pizza' => array(
-			'grp-some-group5' => array(
-				'description' => 'Some group description 5',
-				'users' => array(
-					'mgr5-1' => array(
-						'isManager' => true,
-					),
-					'mgr5-2' => array(
-						'isManager' => true,
-					),
-					'usr5-1' => array(
-						'isManager' => false,
-					),
-					'usr5-2' => array(
-						'isManager' => false,
-					),
-				),
-			),
-		),
-	),
-	'system' => array(
-		'privileges' => array(
-			'priv-groupadd' => array(
-				'description' => 'Allows users to create user groups',
-				'users' => array(
-					'someone@somewhere.nl' => array(
-						'isManager' => true,
-					),
-					'chrisdm' => array(
-						'isManager' => false,
-					),
-				),
-			),
-		),
-	),
-);
-
-?>
 <script>
 // {{{
+
+// TODO: Move to a .js file.
 
 $(function(){
 	"use strict";
@@ -196,7 +79,7 @@ $(function(){
 $(function() {
 	"use strict";
 
-	var categories = <?= json_encode($categories) ?>;
+	var categories = <?= json_encode($groupHierarchy) ?>;
 
 	var groups = (function(categories) {
 		var groups = [];
@@ -208,7 +91,7 @@ $(function() {
 						subcategory: subcategoryName,
 						name:        groupName,
 						description: categories[categoryName][subcategoryName][groupName].description,
-						users:       categories[categoryName][subcategoryName][groupName].users
+						members:     categories[categoryName][subcategoryName][groupName].members
 					};
 		return groups;
 	})(categories);
@@ -222,7 +105,7 @@ $(function() {
 	 * \return
 	 */
 	function isMember(groupName, userName) {
-		return groups[groupName].users.hasOwnProperty(userName);
+		return groups[groupName].members.hasOwnProperty(userName);
 	}
 
 	/**
@@ -234,7 +117,7 @@ $(function() {
 	 * \return
 	 */
 	function isManager(groupName, userName) {
-		return isMember(groupName, userName) && groups[groupName].users[userName].isManager;
+		return isMember(groupName, userName) && groups[groupName].members[userName].isManager;
 	}
 
 	/**
@@ -305,7 +188,7 @@ $(function() {
 
 		// Build the user list panel.
 		(function(){
-			var users = groups[groupName].users;
+			var users = groups[groupName].members;
 
 			var $userList = $('#user-list');
 			$userList.find('.list-group-item.user').remove();
@@ -522,7 +405,7 @@ $(function() {
 					var inputMatches = false;
 					for (var i=0; i<users.length; i++) {
 						// Exclude users already in the group.
-						if (!groups[$($el.attr('data-group')).val()].users.hasOwnProperty(users[i])) {
+						if (!groups[$($el.attr('data-group')).val()].members.hasOwnProperty(users[i])) {
 							data.results.push({
 								id:   users[i],
 								text: users[i]
@@ -558,7 +441,7 @@ $(function() {
 		deselectGroup();
 	});
 
-	selectifyInputs($('.selectify-category, .selectify-subcategory, .selectify-user-name'));
+	selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
 
 	var $userList = $('#user-list');
 	$userList.on('click', '.list-group-item.selectable.user', function() {
@@ -569,6 +452,7 @@ $(function() {
 	});
 
 	$userList.on('click', '.list-group-item:has(.placeholder-text)', function() {
+		// Show the user add form.
 		deselectUser();
 		$(this).find('.placeholder-text').addClass('hidden');
 		$(this).find('form').removeClass('hidden');
@@ -576,6 +460,7 @@ $(function() {
 	});
 
 	$('#f-user-create-name').on('select2-close', function() {
+		// Remove the new user name input on unfocus if nothing was entered.
 		if ($(this).val().length === 0) {
 			$(this).parents('form').addClass('hidden');
 			$(this).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
@@ -583,9 +468,11 @@ $(function() {
 	});
 
 	$('#modal-group-create').on('shown.bs.modal', function() {
+		// Auto-focus group name in group add dialog.
 		$('#f-group-create-name').focus();
 	});
 
+	// Group list search.
 	$('#group-list-search').on('keyup', function() {
 		// FIXME: Bootstrap's Collapse plugin is a pain to work with.
 		//        Hiding / showing collapsible elements doesn't work correctly.
@@ -618,6 +505,8 @@ $(function() {
 		}
 		 */
 	});
+
+	// User list search.
 	$('#user-list-search').on('keyup', function() {
 		var $users  = $('.panel.users .user');
 
@@ -631,16 +520,23 @@ $(function() {
 		}
 	});
 
-	var selectedGroup = YodaPortal.storage.session.get('selected-group');
+	// Indicate which groups are managed by this user.
+	for (var groupName in groups) {
+		if (isManager(groupName, YodaPortal.user.userName))
+			$('#group-list .group[data-name="' + groupName + '"]').append(
+				'<span class="pull-right glyphicon glyphicon-tower" title="You manage this group"></span>'
+			);
+	}
 
+	var selectedGroup = YodaPortal.storage.session.get('selected-group');
 	if (selectedGroup !== null && groups.hasOwnProperty(selectedGroup)) {
+		// Automatically select the last selected group within this session (bound to this tab).
 		selectGroup(selectedGroup);
 	} else {
+		// When the user can only access a single category, unfold it automatically.
 		var $categoryEls = $('#group-list .category');
-		if ($categoryEls.length === 1) {
-			// When the user can only access a single category, unfold it automatically.
+		if ($categoryEls.length === 1)
 			unfoldToGroup($categoryEls.find('.group').attr('data-name'));
-		}
 	}
 });
 
@@ -649,6 +545,8 @@ $(function() {
 
 <style>
 /* {{{ */
+
+/* TODO: Move to a .css file. */
 
 .panel-heading .input-group-sm {
 	margin: -7px; /* Search box */
@@ -771,18 +669,13 @@ i.form-control-feedback.glyphicon {
 
 <h1>Group Manager</h1>
 
-<!--
-<pre>
-<?php var_dump($groups); ?>
-</pre>
--->
-
 <div class="row">
 	<div class="col-md-5">
 		<div class="panel panel-default groups">
 			<div class="panel-heading clearfix">
 				<h3 class="panel-title pull-left">Yoda groups</h3>
-				<div class="input-group-sm has-feedback pull-right">
+				<div class="input-group-sm has-feedback pull-right hidden">
+					<!-- TODO: Search groups. -->
 					<input class="form-control input-sm" id="group-list-search" type="text" placeholder="Search groups" />
 					<i class="glyphicon glyphicon-search form-control-feedback"></i>
 				</div>
@@ -793,8 +686,8 @@ i.form-control-feedback.glyphicon {
 	$j = 0;
 	$k = 0;
 
-	ksort($categories);
-	foreach ($categories as $category => $subcategories) {
+	ksort($groupHierarchy);
+	foreach ($groupHierarchy as $category => $subcategories) {
 ?>
 	<li class="list-group-item category" id="category-<?=$i?>" data-name="<?=$category?>">
 	<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?=$i?>" href="#category-<?=$i?>-ul"><?=$category?></a>
@@ -807,9 +700,11 @@ i.form-control-feedback.glyphicon {
 	<ul class="list-group subcategory-ul">
 <?php
 			ksort($groups);
-			foreach ($groups as $group => $members) {
+			foreach ($groups as $group => $properties) {
 ?>
-				<li class="list-group-item selectable group" id="group-<?=$k?>" data-name="<?=$group?>"><?=$group?></li>
+				<li class="list-group-item selectable group" id="group-<?=$k?>" data-name="<?=$group?>">
+					<?=$group?>
+				</li>
 <?php
 				$k++;
 			}
@@ -871,7 +766,7 @@ i.form-control-feedback.glyphicon {
 					<div class="form-group">
 						<label class="col-sm-4 control-label" for="f-group-update-description">Description</label>
 						<div class="col-sm-8">
-							<input name="group_description" id="f-group-update-description" class="form-control" type="text" pattern="^[a-z0-9\-]+$" required oninvalid="setCustomValidity(\'Please enter only lowercase letters, numbers, and hyphens (-).\')" onchange="setCustomValidity(\'\')" placeholder="Enter a short description for this group" />
+							<input name="group_description" id="f-group-update-description" class="form-control" type="text" placeholder="Enter a short description for this group" />
 						</div>
 					</div>
 					<div class="form-group">
@@ -884,7 +779,7 @@ i.form-control-feedback.glyphicon {
 		</div>
 		<div class="panel panel-default users">
 			<div class="panel-heading clearfix">
-				<h3 class="panel-title pull-left">Groups members</h3>
+				<h3 class="panel-title pull-left">Group members</h3>
 				<div class="input-group-sm has-feedback pull-right">
 					<input class="form-control input-sm" id="user-list-search" type="text" placeholder="Search users" />
 					<i class="glyphicon glyphicon-search form-control-feedback"></i>
@@ -920,7 +815,6 @@ i.form-control-feedback.glyphicon {
 		</div>
 	</div>
 </div>
-
 
 <div class="modal fade" id="modal-group-create" tabindex="-1" role="dialog">
 	<div class="modal-dialog">
@@ -968,23 +862,6 @@ i.form-control-feedback.glyphicon {
 						</div>
 					</div>
 				</form>
-			</div>
-		</div>
-	</div>
-</div>
-
-
-
-<div class="row hidden">
-	<div class="col-md-6">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">Add a group</h3>
-			</div>
-			<div class="panel-body">
-				<p>
-					<!-- Yada yada -->
-				</p>
 			</div>
 		</div>
 	</div>

@@ -13,7 +13,7 @@
 			<ul class="nav navbar-nav">
 <?php
 
-global $YODA_MODULES; // FIXME FIXME FIXME FIXME FIXME FIXME FIXME
+global $YODA_MODULES; // FIXME.
 
 	foreach ($YODA_MODULES as $module_name => $module) {
 		$active = (isset($active_module) && $active_module === $module_name);

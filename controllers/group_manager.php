@@ -11,10 +11,16 @@ class Group_Manager extends CI_Controller {
 		if (isset($this->_account))
 			return $this->_account;
 		else
-			return $this->_account = new RODSAccount($this->_getIrodsHost(), $this->_getIrodsPort(), $this->_getUserName(), $this->_getPassword());
+			return $this->_account = new RODSAccount
+				($this->_getIrodsHost()
+				,$this->_getIrodsPort()
+				,$this->_getUserName()
+				,$this->_getPassword());
 	}
 
 	protected function _getIrodsHost() {
+		// TODO: Use a configuration system.
+		// TODO: Move modelly stuff to models.
 		return 'pax-vm-uu';
 	}
 	protected function _getIrodsPort() {
@@ -150,6 +156,85 @@ EORULE;
 		}
 	}
 
+	protected function _getGroupMembers($groupName) {
+		$ruleBody = <<<EORULE
+rule {
+	uuGroupGetMembers(*groupName, *memberList);
+	uuJoin(',', *memberList, *members);
+}
+EORULE;
+		$rule = new ProdsRule(
+			$this->_getAccount(),
+			$ruleBody,
+			array(
+				'*groupName' => $groupName,
+			),
+			array(
+				'*members',
+			)
+		);
+		$result = $rule->execute();
+		return explode(',', $result['*members']);
+	}
+
+	protected function _getGroupProperties($groupName) {
+		$ruleBody = <<<EORULE
+rule {
+	uuGroupGetCategory(*groupName, *category, *subcategory);
+	uuGroupGetDescription(*groupName, *description);
+	uuGroupGetManagers(*groupName, *managerList);
+	uuJoin(',', *managerList, *managers);
+}
+EORULE;
+		$rule = new ProdsRule(
+			$this->_getAccount(),
+			$ruleBody,
+			array(
+				'*groupName' => $groupName,
+			),
+			array(
+				'*category',
+				'*subcategory',
+				'*description',
+				'*managers',
+			)
+		);
+		$result = $rule->execute();
+
+		return array(
+			'category'    => $result['*category'],
+			'subcategory' => $result['*subcategory'],
+			'description' => $result['*description'],
+			'managers'    => explode(',', $result['*managers']),
+		);
+	}
+
+	protected function _getGroupHierarchy() {
+		$groups = $this->_getUserGroups();
+
+		$hierarchy = array();
+
+		foreach ($groups as $groupName) {
+			$properties = $this->_getGroupProperties($groupName);
+			if (!empty($properties['category']) && !empty($properties['subcategory'])) {
+
+				$members = array();
+				foreach ($this->_getGroupMembers($groupName) as $member)
+					// If only PHP's array_map worked properly with maps...
+					$members[$member] = array(
+						'isManager' => in_array($member, $properties['managers'])
+					);
+
+				$hierarchy[$properties['category']][$properties['subcategory']][$groupName] = array(
+					'description' => $properties['description'],
+					'members'     => $members,
+				);
+			}
+		}
+
+		return $hierarchy;
+	}
+
 	public function getCategories() {
 		$query = $this->input->get('query');
 
@@ -204,8 +289,14 @@ EORULE;
 			));
 	}
 
-	public function groupAdd() {
+	public function groupCreate() {
 		redirect('group-manager');
+		// TODO.
+	}
+
+	public function userCreate() {
+		redirect('group-manager');
+		// TODO.
 	}
 
 	public function index() {
@@ -223,7 +314,7 @@ EORULE;
 			'user'   => array(
 				'userName' => $this->_getUserName(),
 			),
-			'groups' => $groups,
+			'groupHierarchy' => $this->_getGroupHierarchy(),
 		]);
 		$this->load->view('common-footer');
 		$this->load->view('common-end');

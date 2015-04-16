@@ -42,11 +42,11 @@ $route['default_controller'] = "home";
 $route['404_override'] = '';
 
 $route['group-manager']                   = "group_manager";
-$route['group-manager/group-add']         = "group_manager/groupAdd";
 $route['group-manager/get-categories']    = "group_manager/getCategories";
 $route['group-manager/get-subcategories'] = "group_manager/getSubcategories";
 $route['group-manager/get-users']         = "group_manager/getUsers";
-
+$route['group-manager/group-create']      = "group_manager/groupCreate";
+$route['group-manager/user-create']       = "group_manager/userCreate";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
