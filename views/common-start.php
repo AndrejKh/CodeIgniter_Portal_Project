@@ -18,6 +18,7 @@
 	<script src="<?=base_url('/fw/jquery/js/jquery.min.js')?>"></script>
 	<script src="<?=base_url('/fw/bootstrap/js/bootstrap.min.js')?>"></script>
 	<script src="<?=base_url('/fw/select2/select2.min.js')?>"></script>
+	<script src="<?=base_url('/js/yoda-portal.js')?>"></script>
 <?php
 	if (isset($script_includes)) {
 		foreach ($script_includes as $include) {
@@ -25,6 +26,17 @@
 	<script src="<?=base_url($include)?>"></script>
 <?php
 		}
+	}
+	if (isset($user) && isset($user['userName'])) {
+?>
+	<script>
+		$(function() {
+			YodaPortal.extend('user', {
+				userName: '<?=$user['userName']?>',
+			});
+		});
+	</script>
+<?php
 	}
 ?>
 </head>

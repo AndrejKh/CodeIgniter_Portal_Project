@@ -1,0 +1,112 @@
+@charset "UTF-8";
+/**
+ * \file
+ * \brief     Yoda Group Manager frontend styling.
+ * \author    Chris Smeele
+ * \copyright Copyright (c) 2015, Utrecht university. All rights reserved
+ * \license   GPLv3, see LICENSE
+ */
+
+.panel-heading .input-group-sm {
+	margin: -7px; /* Search box */
+}
+.panel-footer  .input-group-sm {
+	margin: -6px; /* Search box */
+}
+
+i.form-control-feedback.glyphicon {
+	color: #aaa;
+}
+
+.panel > .list-group .list-group .list-group-item {
+	border-top:    1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+}
+
+.panel > .list-group .list-group {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+.panel > .list-group .list-group .list-group .list-group-item {
+	padding-left: 30px;
+}
+
+.list-group a.list-group-item {
+	cursor: pointer;
+}
+
+.panel > .list-group .list-group-item.category,
+.panel > .list-group .list-group-item.subcategory {
+	padding-left: 0;
+	padding-right: 0;
+	border: none;
+}
+
+.panel > .list-group .list-group-item.subcategory > .list-group > .list-group-item:last-child {
+	border-bottom: 1px solid #ddd;
+}
+
+.panel > .list-group .list-group-item.subcategory:last-child > .list-group > .list-group-item:last-child {
+	border-bottom: none;
+}
+
+.panel > .list-group .list-group-item.category > .name,
+.panel > .list-group .list-group-item.subcategory > .name {
+	padding-left:  15px;
+	padding-right: 15px;
+	padding-bottom: 10px;
+}
+
+.panel > .list-group .list-group-item.category > .name {
+	font-weight: bold;
+}
+.panel > .list-group .list-group-item.subcategory > .name {
+	padding-left: 30px;
+	font-weight: bold;
+}
+
+#group-list {
+	/*
+	min-height: 320px;
+	max-height: 320px;
+	*/
+	overflow: auto;
+}
+
+#group-list a {
+	display: block;
+}
+
+#group-list .list-group,
+#group-list .list-group .list-group-item {
+	border-radius: 0;
+}
+
+#group-list + .panel-footer {
+	border-top: 1px solid #ddd
+}
+
+#user-list .user .glyphicon {
+	padding-right: 8px;
+}
+
+#user-list .self {
+	cursor: default;
+}
+
+#user-list .self:after {
+	content: ' (you)';
+}
+
+#user-list .list-group-item #f-user-create {
+	margin: -5px -5px;
+}
+
+.placeholder-text {
+	font-style: italic;
+	color: #aaa;
+}
+
+.list-group-item.filtered {
+	display: none;
+}

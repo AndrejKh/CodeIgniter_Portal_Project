@@ -11,7 +11,7 @@ if (chdir($CODEIGNITER_ROOT) === FALSE) {
 		. '</pre>'
 	);
 	error_log(
-		  'Configuration error (in yoda-portal\'s public/index.php): '
+		  'Configuration error in yoda-portal\'s public/index.php: '
 		. 'Could not find CodeIgniter directory at \'' . $CODEIGNITER_ROOT . '\'.'
 	);
 	http_response_code(500);

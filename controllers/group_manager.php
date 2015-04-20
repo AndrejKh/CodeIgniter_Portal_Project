@@ -304,16 +304,16 @@ EORULE;
 		$groups = $this->_getUserGroups();
 
 		$this->load->view('common-start', [
-			 'style_includes' => ['group-manager.css'],
-			'script_includes' => ['group-manager.js'],
+			 'style_includes' => ['css/group-manager.css'],
+			'script_includes' => ['js/group-manager.js'],
+			'user'   => array(
+				'userName' => $this->_getUserName(),
+			),
 		]);
 		$this->load->view('common-header', [
 			'active_module' => 'group-manager',
 		]);
 		$this->load->view('group-manager_index', [
-			'user'   => array(
-				'userName' => $this->_getUserName(),
-			),
 			'groupHierarchy' => $this->_getGroupHierarchy(),
 		]);
 		$this->load->view('common-footer');
