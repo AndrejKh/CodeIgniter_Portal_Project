@@ -140,18 +140,19 @@ $(function() {
 	 * \param groupName
 	 */
 	function selectGroup(groupName) {
+		console.log('selecting ' + groupName);
 		var group = groups[groupName];
 
 		var $groupList = $('#group-list');
 		var $group     = $groupList.find('.group[data-name="' + groupName + '"]');
-		var $oldGroup  = $groupList.find('.selected');
+		var $oldGroup  = $groupList.find('.active');
 
 		if ($group.is($oldGroup))
 			return;
 
-		$oldGroup.removeClass('selected');
+		$oldGroup.removeClass('active');
 		unfoldToGroup(groupName);
-		$group.addClass('selected');
+		$group.addClass('active');
 		YodaPortal.storage.session.set('selected-group', groupName);
 
 		// Build the group properties panel.
@@ -214,12 +215,12 @@ $(function() {
 				// Loop through the sorted user list and generate the #userList element.
 				var user = users[userName];
 
-				var $user = $('<li class="list-group-item selectable user">');
+				var $user = $('<a class="list-group-item user">');
 				$user.attr('id', 'user-' + i);
 				$user.addClass(user.isManager ? 'manager' : 'regular');
 				$user.attr('data-name', userName);
 				if (userName === YodaPortal.user.userName)
-					$user.removeClass('selectable')
+					$user.addClass('disabled')
 					     .addClass('self')
 					     .attr('title', 'You cannot change your own role or remove yourself from this group.');
 
@@ -267,7 +268,7 @@ $(function() {
 		deselectUser();
 
 		var $groupList = $('#group-list');
-		$groupList.find('.selected').removeClass('selected');
+		$groupList.find('.active').removeClass('active');
 
 		var $groupProperties = $('#group-properties');
 		$groupProperties.find('.placeholder-text').removeClass('hidden');
@@ -295,15 +296,15 @@ $(function() {
 		var $userList = $('#user-list');
 
 		var $user    = $userList.find('.user[data-name="' + userName + '"]');
-		var $oldUser = $userList.find('.selected');
+		var $oldUser = $userList.find('.active');
 
 		if ($user.is($oldUser))
 			return;
 
-		$userList.find('.selected').removeClass('selected');
-		$user.addClass('selected');
+		$userList.find('.active').removeClass('active');
+		$user.addClass('active');
 
-		if (isManager($('#group-list .selected.group').attr('data-name'), YodaPortal.user.userName)) {
+		if (isManager($('#group-list .active.group').attr('data-name'), YodaPortal.user.userName)) {
 			var $userPanel = $('.panel.users');
 			$userPanel.find('.update-button, .delete-button').removeClass('disabled');
 		}
@@ -314,7 +315,7 @@ $(function() {
 	 */
 	function deselectUser() {
 		var $userList = $('#user-list');
-		$userList.find('.selected').removeClass('selected');
+		$userList.find('.active').removeClass('active');
 		$('.panel.users').find('.update-button, .delete-button').addClass('disabled');
 	}
 
@@ -430,8 +431,8 @@ $(function() {
 	}
 
 	var $groupList = $('#group-list');
-	$groupList.on('click', '.list-group-item.selectable.group', function() {
-		if ($(this).is($groupList.find('.selected')))
+	$groupList.on('click', 'a.group', function() {
+		if ($(this).is($groupList.find('.active')))
 			deselectGroup();
 		else
 			selectGroup($(this).attr('data-name'));
@@ -444,8 +445,8 @@ $(function() {
 	selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
 
 	var $userList = $('#user-list');
-	$userList.on('click', '.list-group-item.selectable.user', function() {
-		if ($(this).is($userList.find('.selected')))
+	$userList.on('click', 'a.user:not(.disabled)', function() {
+		if ($(this).is($userList.find('.active')))
 			deselectUser();
 		else
 			selectUser($(this).attr('data-name'));
@@ -499,7 +500,7 @@ $(function() {
 			//$categories.children('ul:not(.in)').addClass('collapse');
 			//$categories.children('a.name:not(.collapsed)').addClass('collapsed');
 
-			var $selected = $groups.filter('.selected');
+			var $selected = $groups.filter('.active');
 			if ($selected.length)
 				unfoldToGroup($selected.attr('data-name'));
 		}
@@ -572,18 +573,8 @@ i.form-control-feedback.glyphicon {
 	padding-left: 30px;
 }
 
-
-.list-group-item.selectable {
+.list-group a.list-group-item {
 	cursor: pointer;
-	transition: background-color 100ms;
-}
-.list-group-item.selectable.selected {
-	background-color: #337ab7;
-	color: #fff;
-	box-shadow: 0 0 4px rgba(26,61,92,0.2) inset;
-}
-.list-group-item.selectable:not(.selected):hover {
-	background-color: #eee;
 }
 
 .panel > .list-group .list-group-item.category,
@@ -601,17 +592,17 @@ i.form-control-feedback.glyphicon {
 	border-bottom: none;
 }
 
-.panel > .list-group li.category > .name,
-.panel > .list-group li.subcategory > .name {
+.panel > .list-group .list-group-item.category > .name,
+.panel > .list-group .list-group-item.subcategory > .name {
 	padding-left:  15px;
 	padding-right: 15px;
 	padding-bottom: 10px;
 }
 
-.panel > .list-group li.category > .name {
+.panel > .list-group .list-group-item.category > .name {
 	font-weight: bold;
 }
-.panel > .list-group li.subcategory > .name {
+.panel > .list-group .list-group-item.subcategory > .name {
 	padding-left: 30px;
 	font-weight: bold;
 }
@@ -642,8 +633,6 @@ i.form-control-feedback.glyphicon {
 }
 
 #user-list .self {
-	/*background-color: #ffe;*/
-	color: #999;
 	cursor: default;
 }
 
@@ -680,7 +669,7 @@ i.form-control-feedback.glyphicon {
 					<i class="glyphicon glyphicon-search form-control-feedback"></i>
 				</div>
 			</div>
-			<ul class="list-group" id="group-list">
+			<div class="list-group" id="group-list">
 <?php
 	$i = 0;
 	$j = 0;
@@ -689,39 +678,41 @@ i.form-control-feedback.glyphicon {
 	ksort($groupHierarchy);
 	foreach ($groupHierarchy as $category => $subcategories) {
 ?>
-	<li class="list-group-item category" id="category-<?=$i?>" data-name="<?=$category?>">
-	<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?=$i?>" href="#category-<?=$i?>-ul"><?=$category?></a>
-		<ul class="list-group collapse category-ul" id="category-<?=$i?>-ul">
+	<div class="list-group-item category" id="category-<?=$i?>" data-name="<?=$category?>">
+		<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?=$i?>" href="#category-<?=$i?>-ul">
+			<?=$category?>
+		</a>
+		<div class="list-group collapse category-ul" id="category-<?=$i?>-ul">
 <?php
 		ksort($subcategories);
 		foreach ($subcategories as $subcategory => $groups) {
 ?>
-	<li class="list-group-item subcategory" data-name="<?=$subcategory?>"><div class="name"><?=$subcategory?></div>
-	<ul class="list-group subcategory-ul">
+	<div class="list-group-item subcategory" data-name="<?=$subcategory?>"><div class="name"><?=$subcategory?></div>
+	<div class="list-group subcategory-ul">
 <?php
 			ksort($groups);
 			foreach ($groups as $group => $properties) {
 ?>
-				<li class="list-group-item selectable group" id="group-<?=$k?>" data-name="<?=$group?>">
+				<a class="list-group-item group" id="group-<?=$k?>" data-name="<?=$group?>">
 					<?=$group?>
-				</li>
+				</a>
 <?php
 				$k++;
 			}
 ?>
-	</li>
-	</ul>
+	</div>
+	</div>
 <?php
 			$j++;
 		}
 ?>
-	</li>
-	</ul>
+	</div>
+	</div>
 <?php
 		$i++;
 	}
 ?>
-			</ul>
+			</div>
 			<div class="panel-footer clearfix">
 				<div class="input-group-sm pull-left">
 					<a class="btn btn-sm btn-danger disabled delete-button hidden">Remove group</a>
@@ -790,8 +781,8 @@ i.form-control-feedback.glyphicon {
 					Please select a group.
 				</p>
 			</div>
-			<ul class="list-group hidden" id="user-list">
-				<li class="list-group-item item-user-create">
+			<div class="list-group hidden" id="user-list">
+				<div class="list-group-item item-user-create">
 					<span class="placeholder-text">
 						Click here to add a new user to this group
 					</span>
@@ -804,8 +795,8 @@ i.form-control-feedback.glyphicon {
 							</div>
 						</div>
 					</form>
-				</li>
-			</ul>
+				</div>
+			</div>
 			<div class="panel-footer clearfix" style="border-top: 1px solid #ddd;">
 				<div class="input-group-sm pull-left">
 					<a class="btn btn-sm btn-primary disabled update-button">Change role</a>
