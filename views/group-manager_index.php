@@ -28,6 +28,7 @@ $(function() {
 ?>
 	<div class="list-group-item category" id="category-<?=$i?>" data-name="<?=$category?>">
 		<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?=$i?>" href="#category-<?=$i?>-ul">
+			<i class="glyphicon glyphicon-triangle-right triangle"></i>
 			<?=$category?>
 		</a>
 		<div class="list-group collapse category-ul" id="category-<?=$i?>-ul">
@@ -147,8 +148,8 @@ $(function() {
 			</div>
 			<div class="panel-footer clearfix" style="border-top: 1px solid #ddd;">
 				<div class="input-group-sm pull-left">
-					<a class="btn btn-sm btn-primary disabled update-button">Change role</a>
-					<a class="btn btn-sm btn-danger disabled delete-button">Remove</a>
+					<a class="btn btn-sm btn-primary disabled update-button" title="Change whether the selected user is a manager in this group">Change role</a>
+					<a class="btn btn-sm btn-danger disabled delete-button" title="Remove the selected user from this group">Remove</a>
 				</div>
 			</div>
 		</div>

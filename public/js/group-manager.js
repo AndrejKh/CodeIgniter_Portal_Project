@@ -11,6 +11,12 @@
 $(function() {
 	YodaPortal.extend('groupManager', {
 
+		/**
+		 * \brief If the amount of visible groups is higher than or equal to this value,
+		 *        categories in the group list will be folded on page load.
+		 */
+		CATEGORY_FOLD_THRESHOLD: 8,
+
 		groupHierarchy: null, ///< A group hierarchy object. See YodaPortal.groupManager.load().
 		groups:         null, ///< A list of group objects with member information. See YodaPortal.groupManager.load().
 
@@ -150,6 +156,12 @@ $(function() {
 							user.isManager
 							? ' glyphicon-tower'
 							: ' glyphicon-user'
+						)
+						+ '" title="'
+						+ (
+							user.isManager
+							? 'Manager'
+							: 'Regular user'
 						)
 						+ '"></i> '
 						+ userName
@@ -395,6 +407,18 @@ $(function() {
 
 			var that = this;
 			var $groupList = $('#group-list');
+
+			$groupList.on('show.bs.collapse', function(e) {
+				$(e.target).parent('.category').find('.triangle')
+					.removeClass('glyphicon-triangle-right')
+					   .addClass('glyphicon-triangle-bottom');
+			});
+			$groupList.on('hide.bs.collapse', function(e) {
+				$(e.target).parent('.category').find('.triangle')
+					.removeClass('glyphicon-triangle-bottom')
+					   .addClass('glyphicon-triangle-right');
+			});
+
 			$groupList.on('click', 'a.group', function() {
 				if ($(this).is($groupList.find('.active')))
 					that.deselectGroup();
@@ -403,7 +427,7 @@ $(function() {
 			});
 
 			$('.panel.groups').on('click', '.create-button', function() {
-				that.deselectGroup();
+				//that.deselectGroup();
 			});
 
 			this.selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
@@ -439,8 +463,7 @@ $(function() {
 
 			// Group list search.
 			$('#group-list-search').on('keyup', function() {
-				// FIXME: Bootstrap's Collapse plugin is a pain to work with.
-				//        Hiding / showing collapsible elements doesn't work correctly.
+				// FIXME: Figure out how to correctly hide / show collapsible Bootstrap elements.
 				return;
 
 				/*
@@ -496,6 +519,14 @@ $(function() {
 			if (selectedGroup !== null && this.groups.hasOwnProperty(selectedGroup)) {
 				// Automatically select the last selected group within this session (bound to this tab).
 				this.selectGroup(selectedGroup);
+			}
+
+			if (Object.keys(this.groups).length < this.CATEGORY_FOLD_THRESHOLD) {
+				// Unfold all categories if the user has access to less than
+				// CATEGORY_FOLD_THRESHOLD groups.
+				for (groupName in this.groups) {
+					this.unfoldToGroup(groupName);
+				};
 			} else {
 				// When the user can only access a single category, unfold it automatically.
 				var $categoryEls = $('#group-list .category');
