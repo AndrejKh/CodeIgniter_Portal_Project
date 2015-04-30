@@ -29,7 +29,7 @@ $(function() {
 		 * \return
 		 */
 		isMember: function(groupName, userName) {
-			return this.groups[groupName].members.hasOwnProperty(userName);
+			return groupName in this.groups && this.groups[groupName].members.hasOwnProperty(userName);
 		},
 
 		/**
@@ -257,110 +257,143 @@ $(function() {
 		selectifyInputs: function(sel) {
 			var that = this;
 
-			$(sel).filter('.selectify-category').select2({
-				query: function(query) {
-					var data = { results: [] };
+			$(sel).filter('.selectify-category').each(function() {
+				var $el = $(this);
 
-					$.ajax({
+				$el.select2({
+					ajax: {
+						quietMillis: 200,
 						url:      '/group-manager/get-categories',
 						type:     'get',
 						dataType: 'json',
-						data:     { query: query.term }
-					}).done(function(categories) {
-						var inputMatches = false;
-						for (var i=0; i<categories.length; i++) {
-							data.results.push({
-								id:   categories[i],
-								text: categories[i]
+						data: function (term, page) {
+							return { query: term };
+						},
+						results: function (categories) {
+							var results = [];
+							var query   = $el.data('select2').search.val();
+							var inputMatches = false;
+
+							categories.forEach(function(category) {
+								results.push({
+									id:   category,
+									text: category
+								});
+								if (query === category)
+									inputMatches = true;
 							});
-							if (query.term === categories[i])
-								inputMatches = true;
-						}
-						if (!inputMatches && query.term.length)
-							data.results.unshift({
-								id:   query.term,
-								text: query.term
-							});
-						query.callback(data);
-					}).fail(function() {
-						console.log('Error: Could not get a list of categories.');
-					});
-				}
-			}).on('open', function() {
-				$(this).select2('val', '');
-			}).on('change', function() {
-				$($(this).attr('data-subcategory')).select2('data', '');
+							if (!inputMatches && query.length)
+								results.unshift({
+									id:   query,
+									text: query
+								});
+
+							return { results: results };
+						},
+					},
+					initSelection: function($el, callback) {
+						callback({ id: $el.val(), text: $el.val() });
+					},
+				}).on('open', function() {
+					$(this).select2('val', '');
+				}).on('change', function() {
+					$($(this).attr('data-subcategory')).select2('val', '');
+				});
 			});
 
-			$(sel).filter('.selectify-subcategory').select2({
-				query: function(query) {
-					var data = { results: [] };
+			$(sel).filter('.selectify-subcategory').each(function() {
+				var $el = $(this);
 
-					$.ajax({
+				$el.select2({
+					ajax: {
+						quietMillis: 200,
 						url:      '/group-manager/get-subcategories',
 						type:     'get',
 						dataType: 'json',
-						data:     { category: $($(this.element).attr('data-category')).val(), query: query.term }
-					}).done(function(subcategories) {
-						var inputMatches = false;
-						for (var i=0; i<subcategories.length; i++) {
-							data.results.push({
-								id:   subcategories[i],
-								text: subcategories[i]
+						data: function (term, page) {
+							return {
+								category: $($el.attr('data-category')).val(),
+								query: term
+							};
+						},
+						results: function (subcategories) {
+							var results = [];
+							var query   = $el.data('select2').search.val();
+							var inputMatches = false;
+
+							subcategories.forEach(function(subcategory) {
+								results.push({
+									id:   subcategory,
+									text: subcategory
+								});
+								if (query === subcategory)
+									inputMatches = true;
 							});
-							if (query.term === subcategories[i])
-								inputMatches = true;
-						}
-						if (!inputMatches && query.term.length)
-							data.results.unshift({
-								id:   query.term,
-								text: query.term
-							});
-						query.callback(data);
-					}).fail(function() {
-						console.log('Error: Could not get a list of subcategories.');
-					});
-				}
-			}).on('open', function() {
-				$(this).select2('val', '');
+							if (!inputMatches && query.length)
+								results.unshift({
+									id:   query,
+									text: query
+								});
+
+							return { results: results };
+						},
+					},
+					initSelection: function($el, callback) {
+						callback({ id: $el.val(), text: $el.val() });
+					},
+				}).on('open', function() {
+					$(this).select2('val', '');
+				});
 			});
 
-			$(sel).filter('.selectify-user-name').select2({
-				query: function(query) {
-					var data = { results: [] };
+			$(sel).filter('.selectify-user-name').each(function() {
+				var $el = $(this);
 
-					var $el = $(this.element);
-
-					$.ajax({
+				$el.select2({
+					allowClear: true,
+					minimumInputLength: 4,
+					ajax: {
+						quietMillis: 400,
 						url:      '/group-manager/get-users',
 						type:     'get',
 						dataType: 'json',
-						data:     { query: query.term }
-					}).done(function(users) {
-						var inputMatches = false;
-						for (var i=0; i<users.length; i++) {
-							// Exclude users already in the group.
-							if (!that.groups[$($el.attr('data-group')).val()].members.hasOwnProperty(users[i])) {
-								data.results.push({
-									id:   users[i],
-									text: users[i]
-								});
-								if (query.term === users[i])
-									inputMatches = true;
-							}
-						}
-						if (!inputMatches && query.term.length)
-							data.results.unshift({
-								id:   query.term,
-								text: query.term
+						data: function (term, page) {
+							return {
+								query: term
+							};
+						},
+						results: function (users) {
+							var query   = $el.data('select2').search.val();
+							var results = [];
+							var inputMatches = false;
+
+							users.forEach(function(userName) {
+								// Exclude users already in the group.
+								if (!(userName in that.groups[$($el.attr('data-group')).val()].members)) {
+									results.push({
+										id:   userName,
+										text: userName
+									});
+									if (query === userName)
+										inputMatches = true;
+								}
 							});
-						query.callback(data);
-					}).fail(function() {
-						console.log('Error: Could not get a list of users.');
-					});
-				}
-			}).on('open', function() {
-				$(this).select2('val', ''); // XXX
+
+							if (!inputMatches && query.length)
+								results.unshift({
+									id:   query,
+									text: query
+								});
+
+							return { results: results };
+						},
+					},
+					initSelection: function($el, callback) {
+						callback({ id: $el.val(), text: $el.val() });
+					},
+				}).on('open', function() {
+					$(this).select2('val', '');
+				});
 			});
 		},
 
