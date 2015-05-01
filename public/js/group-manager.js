@@ -641,6 +641,68 @@ $(function() {
 		},
 
 		/**
+		 * \brief Remove the confirmation step for removing users from groups.
+		 */
+		removeUserDeleteConfirmationModal: function() {
+			var that = this;
+			$('.users.panel .delete-button').on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				that.onClickUserDelete(this);
+			});
+		},
+
+		/**
+		 * \brief Handle a user delete button click event.
+		 *
+		 * `this` is assumed to be the groupManager object, not the form element
+		 * that was submitted.
+		 */
+		onClickUserDelete: function(el) {
+			if ($('#f-user-delete-no-confirm').prop('checked')) {
+				YodaPortal.storage.session.set('confirm-user-delete', true);
+				this.removeUserDeleteConfirmationModal();
+			}
+
+			var groupName = $('#group-list .group.active').attr('data-name');
+			var  userName = $('#user-list  .user.active').attr('data-name');
+
+			var that = this;
+
+			console.log(el);
+
+			$.ajax({
+				url:      $(el).attr('data-action'),
+				type:     'post',
+				dataType: 'json',
+				data: {
+					group_name: groupName,
+					 user_name: userName,
+				},
+			}).done(function(result) {
+				if ('status' in result)
+					console.log('User remove completed with status ' + result.status);
+				if ('status' in result && result.status === 0) {
+					delete that.groups[groupName].members[userName];
+
+					that.deselectGroup();
+					that.selectGroup(groupName);
+				} else {
+					// Something went wrong. :(
+					if ('message' in result)
+						alert(result.message);
+					else
+						alert(
+							  "Error: Could not remove the selected user from the group due to an internal error.\n"
+							+ "Please contact a Yoda administrator"
+						);
+				}
+			}).fail(function() {
+				alert("Error: Could not remove the selected user from the group due to an internal error.\nPlease contact a Yoda administrator");
+			});
+		},
+
+		/**
 		 * \brief Initialize the group manager module.
 		 *
 		 * The structure of the gruopHierarchy parameter is as follows:
@@ -762,6 +824,22 @@ $(function() {
 			$('#f-user-create').on('submit', function(e) {
 				that.onSubmitUserCreate(this, e);
 			});
+
+			// Remove users from groups.
+			$('#modal-user-delete .confirm').on('click', function(e) {
+				that.onClickUserDelete($('.users.panel .delete-button')[0]);
+				$('#modal-user-delete').modal('hide');
+			});
+
+			$('#modal-user-delete').on('show.bs.modal', function() {
+				var groupName = $('#group-list .group.active').attr('data-name');
+				var  userName = $('#user-list  .user.active').attr('data-name');
+				$(this).find('.group').text(groupName);
+				$(this).find('.user').text(userName);
+			});
+
+			if (YodaPortal.storage.session.get('confirm-user-delete', false))
+				this.removeUserDeleteConfirmationModal();
 
 			$('#f-user-create').on('keypress', '.select2-chosen', function(e) {
 				// NOTE: This requires a patched select2.js where a key event is

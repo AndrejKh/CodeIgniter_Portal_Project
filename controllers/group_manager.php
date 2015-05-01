@@ -426,6 +426,35 @@ EORULE;
 			)));
 	}
 
+	public function userDelete() {
+		$ruleBody = <<<EORULE
+rule {
+	uuGroupUserRemove(*groupName, *userName, *statusInt, *message);
+	*status = str(*statusInt);
+}
+EORULE;
+		$rule = new ProdsRule(
+			$this->_getAccount(),
+			$ruleBody,
+			array(
+				'*groupName' => $this->input->post('group_name'),
+				'*userName'  => $this->input->post('user_name'),
+			),
+			array(
+				'*status',
+				'*message',
+			)
+		);
+		$result = $rule->execute();
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'status'  => (int)$result['*status'],
+				'message' =>      $result['*message'],
+			)));
+	}
+
 	public function index() {
 		$categories = $this->_getCategories();
 		$groups = $this->_getUserGroups();

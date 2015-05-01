@@ -151,7 +151,7 @@ $(function() {
 			<div class="panel-footer clearfix" style="border-top: 1px solid #ddd;">
 				<div class="input-group-sm pull-left">
 					<a class="btn btn-sm btn-primary disabled update-button" title="Change whether the selected user is a manager in this group">Change role</a>
-					<a class="btn btn-sm btn-danger disabled delete-button" title="Remove the selected user from this group">Remove</a>
+					<a class="btn btn-sm btn-danger disabled delete-button" data-action="/group-manager/user-delete" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove</a>
 				</div>
 			</div>
 		</div>
@@ -204,6 +204,34 @@ $(function() {
 						</div>
 					</div>
 				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="modal-user-delete" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<h4 class="modal-title" id="myModalLabel">Confirm user removal</h4>
+			</div>
+			<div class="modal-body">
+				<p>
+					Are you sure you want to remove <strong class="user"></strong>
+					from group <strong class="group"></strong>?
+				</p>
+			</div>
+			<div class="modal-footer">
+				<div class="input-group pull-left">
+					<div class="checkbox">
+						<label for="f-user-delete-no-confirm">
+							<input id="f-user-delete-no-confirm" type="checkbox" /> Don't ask again during this session.
+						</label>
+					</div>
+				</div>
+
+				<button class="btn btn-danger confirm">Remove</button>
+				<button class="btn btn-default" data-dismiss="modal">Cancel</button>
 			</div>
 		</div>
 	</div>

@@ -48,6 +48,7 @@ $route['group-manager/get-users']         = "group_manager/getUsers";
 $route['group-manager/group-create']      = "group_manager/groupCreate";
 $route['group-manager/group-update']      = "group_manager/groupUpdate";
 $route['group-manager/user-create']       = "group_manager/userCreate";
+$route['group-manager/user-delete']       = "group_manager/userDelete";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
