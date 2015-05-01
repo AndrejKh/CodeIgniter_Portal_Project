@@ -322,8 +322,8 @@ $(function() {
 
 								if (that.isManagerInCategory(category, YodaPortal.user.userName))
 									results.push({
-										id:       category,
-										text:     category,
+										id:   category,
+										text: category,
 									});
 								else if (inputMatches)
 									// Only show a (disabled) category the user doesn't have access to
@@ -339,14 +339,23 @@ $(function() {
 								&& query.length
 								&& that.isMember('priv-category-add', YodaPortal.user.userName)
 							) {
-								results.unshift({
-									id:   query,
-									text: query
+								results.push({
+									id:     query,
+									text:   query,
+									exists: false
 								});
 							}
 
 							return { results: results };
 						},
+					},
+					formatResult: function(result, $container, query, escaper) {
+						return escaper(result.text)
+							+ (
+								'exists' in result && !result.exists
+								? ' <span class="grey">(create)</span>'
+								: ''
+							);
 					},
 					initSelection: function($el, callback) {
 						callback({ id: $el.val(), text: $el.val() });
@@ -387,13 +396,22 @@ $(function() {
 									inputMatches = true;
 							});
 							if (!inputMatches && query.length)
-								results.unshift({
+								results.push({
 									id:   query,
-									text: query
+									text: query,
+									exists: false
 								});
 
 							return { results: results };
 						},
+					},
+					formatResult: function(result, $container, query, escaper) {
+						return escaper(result.text)
+							+ (
+								'exists' in result && !result.exists
+								? ' <span class="grey">(create)</span>'
+								: ''
+							);
 					},
 					initSelection: function($el, callback) {
 						callback({ id: $el.val(), text: $el.val() });
@@ -407,7 +425,7 @@ $(function() {
 				var $el = $(this);
 
 				$el.select2({
-					allowClear: true,
+					allowClear:  true,
 					openOnEnter: false,
 					minimumInputLength: 4,
 					ajax: {
@@ -438,13 +456,22 @@ $(function() {
 							});
 
 							if (!inputMatches && query.length)
-								results.unshift({
+								results.push({
 									id:   query,
-									text: query
+									text: query,
+									exists: false
 								});
 
 							return { results: results };
 						},
+					},
+					formatResult: function(result, $container, query, escaper) {
+						return escaper(result.text)
+							+ (
+								'exists' in result && !result.exists
+								? ' <span class="grey">(create)</span>'
+								: ''
+							);
 					},
 					initSelection: function($el, callback) {
 						callback({ id: $el.val(), text: $el.val() });

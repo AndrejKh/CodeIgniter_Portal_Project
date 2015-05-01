@@ -14,8 +14,13 @@
 	margin: -6px; /* Search box */
 }
 
+.grey,
 i.form-control-feedback.glyphicon {
 	color: #aaa;
+}
+
+.select2-highlighted .grey {
+	color: #ddd;
 }
 
 .panel > .list-group .list-group .list-group-item {
