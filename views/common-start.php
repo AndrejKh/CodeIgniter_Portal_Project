@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Yoda Portal</title>
 	<link rel="stylesheet" href="<?=base_url('/fw/bootstrap/css/bootstrap.min.css')?>">
 	<link rel="stylesheet" href="<?=base_url('/fw/select2/select2.css')?>">

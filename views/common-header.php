@@ -28,9 +28,10 @@ global $YODA_MODULES; // FIXME.
 ?>
 			</ul>
 			<div class="navbar-form navbar-right">
-				<button class="btn btn-primary">Log in</button>
+				<button class="btn btn-primary">Sign in</button>
 			</div>
 		</div>
 	</div>
 </nav>
 <div class="container page">
+<div id="messages"></div>

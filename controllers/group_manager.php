@@ -275,8 +275,6 @@ EORULE;
 	public function getUsers() {
 		$query = $this->input->get('query');
 
-		// TODO: Use query string in rule call for efficiency.
-
 		$this->output
 			->set_content_type('application/json')
 			->set_output(json_encode(
@@ -290,8 +288,113 @@ EORULE;
 	}
 
 	public function groupCreate() {
-		redirect('group-manager');
-		// TODO.
+		$ruleBody = <<<EORULE
+rule {
+	uuGroupAdd(*groupName, *statusInt, *message);
+	*status = str(*statusInt);
+}
+EORULE;
+		$rule = new ProdsRule(
+			$this->_getAccount(),
+			$ruleBody,
+			array(
+				'*groupName' => $this->input->post('group_name'),
+			),
+			array(
+				'*status',
+				'*message',
+			)
+		);
+		$result = $rule->execute();
+
+		// It seems we can't be sure that this rule is executed AFTER the group
+		// has been created and the user has been added to it.
+		// Wait 200ms to give iRODS some time to process the previous rule.
+		usleep(200000);
+
+		$ruleBody = <<<EORULE
+rule {
+	uuGroupModify(*groupName, "category",    *category, *statusInt, *message);
+	if (*statusInt == 0) {
+		uuGroupModify(*groupName, "subcategory", *subcategory, *statusInt, *message);
+		if (*statusInt == 0) {
+			uuGroupModify(*groupName, "description", *description, *statusInt, *message);
+		}
+	}
+	*status = str(*statusInt);
+}
+EORULE;
+		$rule = new ProdsRule(
+			$this->_getAccount(),
+			$ruleBody,
+			array(
+				'*groupName'   => $this->input->post('group_name'),
+				'*category'    => $this->input->post('group_category'),
+				'*subcategory' => $this->input->post('group_subcategory'),
+				'*description' => $this->input->post('group_description'),
+			),
+			array(
+				'*status',
+				'*message',
+			)
+		);
+		$result = $rule->execute();
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'status'  => (int)$result['*status'],
+				'message' =>      $result['*message'],
+			)));
+	}
+
+	public function groupUpdate() {
+		$toSet = array();
+		foreach (array('description', 'category', 'subcategory') as $property) {
+			if (in_array('group_'.$property, array_keys($this->input->post())))
+				$toSet[$property] = $this->input->post('group_'.$property);
+		}
+
+		$result = array();
+
+		foreach ($toSet as $property => $value) {
+			$ruleBody = <<<EORULE
+rule {
+	uuGroupModify(*groupName, *property, *value, *statusInt, *message);
+	*status = str(*statusInt);
+}
+EORULE;
+			$rule = new ProdsRule(
+				$this->_getAccount(),
+				$ruleBody,
+				array(
+					'*groupName' => $this->input->post('group_name'),
+					'*property'  => $property,
+					'*value'     => $value,
+				),
+				array(
+					'*status',
+					'*message',
+				)
+			);
+			$result = $rule->execute();
+
+			if ($result['*status'] > 0)
+				break;
+		}
+
+		if (!count($toSet))
+			$result = array(
+				'*status'  => 0,
+				'*message' => '',
+			);
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'status'  => (int)$result['*status'],
+				'message' =>      $result['*message'],
+			)));
 	}
 
 	public function userCreate() {

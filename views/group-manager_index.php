@@ -67,7 +67,7 @@ $(function() {
 					<a class="btn btn-sm btn-danger disabled delete-button hidden">Remove group</a>
 				</div>
 				<div class="input-group-sm pull-right">
-					<a class="btn btn-sm btn-primary create-button" data-toggle="modal" data-target="#modal-group-create">Add group</a>
+					<a class="btn btn-sm btn-primary create-button disabled" data-toggle="modal" data-target="#modal-group-create">Add group</a>
 				</div>
 			</div>
 		</div>
@@ -95,18 +95,20 @@ $(function() {
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-sm-4 control-label" for="f-group-update-name">Name</label>
+						<label class="col-sm-4 control-label" for="f-group-update-name">Group name</label>
 						<div class="col-sm-8">
 							<div class="input-group">
-								<div class="input-group-addon">grp-</div>
-								<input name="group_name" id="f-group-update-name" class="form-control" type="text" pattern="^[a-z0-9\-]+$"	required oninvalid="setCustomValidity(\'Please enter only lowercase letters, numbers, and hyphens (-).\')" onchange="setCustomValidity(\'\')" readonly />
+								<div class="input-group-addon">
+									grp-
+								</div>
+								<input name="group_name" id="f-group-update-name" class="form-control" type="text" pattern="^([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$" required oninvalid="setCustomValidity('Please enter only lowercase letters, numbers, and hyphens (-). The group name may not start or end with a hyphen.')" onchange="setCustomValidity('')" />
 							</div>
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-sm-4 control-label" for="f-group-update-description">Description</label>
+						<label class="col-sm-4 control-label" for="f-group-update-description">Group description</label>
 						<div class="col-sm-8">
-							<input name="group_description" id="f-group-update-description" class="form-control" type="text" placeholder="Enter a short description for this group" />
+							<input name="group_description" id="f-group-update-description" class="form-control" type="text" placeholder="Enter a short description" pattern="^[a-zA-Z0-9,.()_ -]*$" oninvalid="setCustomValidity('Please enter only letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).')" onchange="setCustomValidity('')" />
 						</div>
 					</div>
 					<div class="form-group">
@@ -185,14 +187,14 @@ $(function() {
 								<div class="input-group-addon">
 									grp-
 								</div>
-								<input name="group_name" id="f-group-create-name" class="form-control" type="text" pattern="^[a-z0-9\-]+$"  required oninvalid="setCustomValidity('Please enter only lowercase letters, numbers, and hyphens (-).')" onchange="setCustomValidity('')" />
+								<input name="group_name" id="f-group-create-name" class="form-control" type="text" pattern="^([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$" required oninvalid="setCustomValidity('Please enter only lowercase letters, numbers, and hyphens (-). The group name may not start or end with a hyphen.')" onchange="setCustomValidity('')" />
 							</div>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-sm-4 control-label" for="f-group-create-description">Group description</label>
 						<div class="col-sm-8">
-							<input name="group_description" id="f-group-create-description" class="form-control" type="text" placeholder="Enter a short description" />
+							<input name="group_description" id="f-group-create-description" class="form-control" type="text" placeholder="Enter a short description" pattern="^[a-zA-Z0-9,.()_ -]*$" oninvalid="setCustomValidity('Please enter only letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).')" onchange="setCustomValidity('')" />
 						</div>
 					</div>
 					<div class="form-group">

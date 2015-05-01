@@ -45,6 +45,31 @@ $(function() {
 		},
 
 		/**
+		 * \brief Try to check if a user is a manager in the given category.
+		 *
+		 * Returns false if the current user does not have access to the given category.
+		 *
+		 * \param categoryName
+		 * \param userName
+		 *
+		 * \return
+		 */
+		isManagerInCategory: function(categoryName, userName) {
+			var that = this;
+			try {
+				var category = this.groupHierarchy[categoryName];
+				return Object.keys(category).some(function(subcategoryName) {
+					return Object.keys(category[subcategoryName]).some(function(groupName) {
+						return that.isManager(groupName, userName);
+					});
+				});
+			} catch (ex) {
+				// The category is probably not visible to us.
+				return false;
+			}
+		},
+
+		/**
 		 * \brief Unfold the category belonging to the given group in the group list.
 		 *
 		 * \param groupName
@@ -72,6 +97,8 @@ $(function() {
 
 			if ($group.is($oldGroup))
 				return;
+
+			this.deselectGroup();
 
 			this.unfoldToGroup(groupName);
 
@@ -105,7 +132,14 @@ $(function() {
 					});
 				$groupProperties.find('#f-group-update-name')
 					.val(groupName.replace(/^(grp-|priv-)/, ''))
-					.prop('readonly', true);
+					.prop('readonly', true)
+					.attr('title', 'Group names cannot be changed')
+					.attr('data-prefix', function() {
+						var matches = groupName.match(/^(grp-|priv-)/, '');
+						return matches
+							? matches[1]
+							: '';
+					});
 				$groupProperties.find('#f-group-update-description')
 					.val(group.description)
 					.prop('readonly', !userIsManager);
@@ -207,6 +241,7 @@ $(function() {
 			$groupProperties.find('form').addClass('hidden');
 
 			var $userPanel = $('.panel.users');
+			$userPanel.find('#user-list-search').val('');
 			$userPanel.find('.panel-body:has(.placeholder-text)').removeClass('hidden');
 			$userPanel.find('#user-list').addClass('hidden');
 
@@ -223,8 +258,6 @@ $(function() {
 		 * \param groupName
 		 */
 		selectUser: function(userName) {
-			this.deselectUser();
-
 			var $userList = $('#user-list');
 
 			var $user    = $userList.find('.user[data-name="' + userName + '"]');
@@ -232,6 +265,8 @@ $(function() {
 
 			if ($user.is($oldUser))
 				return;
+
+			this.deselectUser();
 
 			$userList.find('.active').removeClass('active');
 			$user.addClass('active');
@@ -260,6 +295,13 @@ $(function() {
 			$(sel).filter('.selectify-category').each(function() {
 				var $el = $(this);
 
+				$el.attr(
+					'placeholder',
+					that.isMember('priv-category-add', YodaPortal.user.userName)
+						? 'Select one or enter a new name'
+						: 'Select a category'
+				);
+
 				$el.select2({
 					ajax: {
 						quietMillis: 200,
@@ -275,18 +317,33 @@ $(function() {
 							var inputMatches = false;
 
 							categories.forEach(function(category) {
-								results.push({
-									id:   category,
-									text: category
-								});
 								if (query === category)
 									inputMatches = true;
+
+								if (that.isManagerInCategory(category, YodaPortal.user.userName))
+									results.push({
+										id:       category,
+										text:     category,
+									});
+								else if (inputMatches)
+									// Only show a (disabled) category the user doesn't have access to
+									// if they type its exact name.
+									results.push({
+										id:       category,
+										text:     category,
+										disabled: true,
+									});
 							});
-							if (!inputMatches && query.length)
+							if (
+								  !inputMatches
+								&& query.length
+								&& that.isMember('priv-category-add', YodaPortal.user.userName)
+							) {
 								results.unshift({
 									id:   query,
 									text: query
 								});
+							}
 
 							return { results: results };
 						},
@@ -420,6 +477,7 @@ $(function() {
 		 * \param groupHierarchy An object representing the category / group hierarchy visible to the user.
 		 *
 		 * \todo Generate the group list in JS just like the user list.
+		 * \todo Better organize this function.
 		 */
 		load: function(groupHierarchy) {
 			this.groupHierarchy = groupHierarchy;
@@ -440,6 +498,8 @@ $(function() {
 
 			var that = this;
 			var $groupList = $('#group-list');
+
+			// Attach event handlers {{{
 
 			$groupList.on('show.bs.collapse', function(e) {
 				$(e.target).parent('.category').find('.triangle')
@@ -489,14 +549,115 @@ $(function() {
 				}
 			});
 
+			$('#modal-group-create').on('show.bs.modal', function() {
+				$('#f-group-create-name')       .val('').attr('data-prefix', 'grp-');
+				$('#f-group-create-description').val('');
+				var $selectedGroup = $('#group-list .group.active');
+				if ($selectedGroup.length) {
+					var groupName = $($selectedGroup[0]).attr('data-name');
+					// Fill in the (sub)category of the currently selected group.
+					$('#f-group-create-category')   .select2('val', that.groups[groupName].category);
+					$('#f-group-create-subcategory').select2('val', that.groups[groupName].subcategory);
+				} else {
+					$('#f-group-create-category')   .select2('val', '');
+					$('#f-group-create-subcategory').select2('val', '');
+				}
+			});
 			$('#modal-group-create').on('shown.bs.modal', function() {
 				// Auto-focus group name in group add dialog.
 				$('#f-group-create-name').focus();
 			});
 
+			$('#f-group-create, #f-group-update').on('submit', function(e) {
+				e.preventDefault();
+
+				var action =
+					$(this).attr('id') === 'f-group-create'
+					? 'create' : 'update';
+
+				var newProperties = {
+					name:          $(this).find('#f-group-'+action+'-name'     ).attr('data-prefix')
+					             + $(this).find('#f-group-'+action+'-name'     ).val(),
+					description: $(this).find('#f-group-'+action+'-description').val(),
+					category:    $(this).find('#f-group-'+action+'-category'   ).val(),
+					subcategory: $(this).find('#f-group-'+action+'-subcategory').val(),
+				};
+
+				if (newProperties.category === '' || newProperties.subcategory === '') {
+					alert('Please select a category and subcategory.');
+					return;
+				} else if (
+					// Validate input, in case HTML5 validation did not work.
+					// Also needed for the select2 inputs.
+					[newProperties.category, newProperties.subcategory, newProperties.description]
+						.some(function(item) {
+						return !item.match(/^[a-zA-Z0-9,.()_ -]*$/);
+					})
+				) {
+					alert('The (sub)category name and group description fields may only contain letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).');
+					return;
+				}
+
+				var postData = {
+					group_name:        newProperties.name,
+					group_description: newProperties.description,
+					group_category:    newProperties.category,
+					group_subcategory: newProperties.subcategory,
+				};
+
+				if (action === 'update') {
+					var selectedGroup = that.groups[$($('#group-list .group.active')[0]).attr('data-name')];
+					['description', 'category', 'subcategory'].forEach(function(item) {
+						// Filter out fields that have not changed.
+						if (selectedGroup[item] === newProperties[item])
+							delete postData['group_' + item];
+					});
+				}
+
+				$.ajax({
+					url:      $(this).attr('action'),
+					type:     'post',
+					dataType: 'json',
+					data:     postData
+				}).done(function(result) {
+					if ('status' in result)
+						console.log('Group '+action+' completed with status ' + result.status);
+					if ('status' in result && result.status === 0) {
+						// OK! Make sure the newly added group is selected after reloading the page.
+						YodaPortal.storage.session.set('selected-group', postData.group_name);
+
+						// And give the user some feedback.
+						YodaPortal.storage.session.set('messages',
+							YodaPortal.storage.session.get('messages', []).concat({
+								type:    'success',
+								message: action === 'create'
+								         ? 'Created group ' + postData.group_name + '.'
+								         : 'Updated '       + postData.group_name + ' group properties.'
+							})
+						);
+
+						$(window).on('beforeunload', function() {
+							$(window).scrollTop(0);
+						});
+						window.location.reload(true);
+					} else {
+						// Something went wrong.
+						if ('message' in result)
+							alert(result.message);
+						else
+							alert(
+								  "Error: Could not "+action+" group due to an internal error.\n"
+								+ "Please contact a Yoda administrator"
+							);
+					}
+				}).fail(function() {
+					alert("Error: Could not create group due to an internal error.\nPlease contact a Yoda administrator");
+				});
+			});
+
 			// Group list search.
 			$('#group-list-search').on('keyup', function() {
-				// FIXME: Figure out how to correctly hide / show collapsible Bootstrap elements.
+				// TODO: Figure out how to correctly hide / show collapsible Bootstrap elements.
 				return;
 
 				/*
@@ -540,6 +701,13 @@ $(function() {
 				}
 			});
 
+			// }}}
+
+			if (this.isMember('priv-group-add', YodaPortal.user.userName)) {
+				var $groupPanel = $('.panel.groups');
+				$groupPanel.find('.create-button').removeClass('disabled');
+			}
+
 			// Indicate which groups are managed by this user.
 			for (var groupName in this.groups) {
 				if (this.isManager(groupName, YodaPortal.user.userName))
@@ -557,9 +725,8 @@ $(function() {
 			if (Object.keys(this.groups).length < this.CATEGORY_FOLD_THRESHOLD) {
 				// Unfold all categories if the user has access to less than
 				// CATEGORY_FOLD_THRESHOLD groups.
-				for (groupName in this.groups) {
+				for (groupName in this.groups)
 					this.unfoldToGroup(groupName);
-				};
 			} else {
 				// When the user can only access a single category, unfold it automatically.
 				var $categoryEls = $('#group-list .category');
