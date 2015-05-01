@@ -140,7 +140,7 @@ $(function() {
 					<form action="<?=base_url('group-manager/user-create')?>" method="POST" class="form-inline hidden" id="f-user-create">
 						<input name="group_name" id="f-user-create-group" type="hidden" />
 						<div class="input-group" style="width: 100%;">
-							<input name="user_name" id="f-user-create-name" class="form-control input-sm selectify-user-name" type="hidden" pattern="^[a-z0-9\-]+$" required oninvalid="setCustomValidity('Please enter only lowercase letters, numbers, and hyphens (-).')" onchange="setCustomValidity('')" placeholder="Enter a username" data-group="#f-user-create-group" />
+							<input name="user_name" id="f-user-create-name" class="form-control input-sm selectify-user-name" type="hidden" required placeholder="Enter a username" data-group="#f-user-create-group" />
 							<div class="input-group-btn">
 								<input id="f-user-create-submit" class="btn btn-primary btn-block btn-sm" type="submit" value="Add" />
 							</div>

@@ -408,6 +408,7 @@ $(function() {
 
 				$el.select2({
 					allowClear: true,
+					openOnEnter: false,
 					minimumInputLength: 4,
 					ajax: {
 						quietMillis: 400,
@@ -455,6 +456,164 @@ $(function() {
 		},
 
 		/**
+		 * \brief Group create / update form submission handler.
+		 *
+		 * `this` is assumed to be the groupManager object, not the form element
+		 * that was submitted.
+		 *
+		 * \param el the form element
+		 * \param e  a submit event
+		 */
+		onSubmitGroupCreateOrUpdate: function(el, e) {
+			e.preventDefault();
+
+			var action =
+				$(el).attr('id') === 'f-group-create'
+				? 'create' : 'update';
+
+			var newProperties = {
+				name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
+							 + $(el).find('#f-group-'+action+'-name'     ).val(),
+				description: $(el).find('#f-group-'+action+'-description').val(),
+				category:    $(el).find('#f-group-'+action+'-category'   ).val(),
+				subcategory: $(el).find('#f-group-'+action+'-subcategory').val(),
+			};
+
+			if (newProperties.category === '' || newProperties.subcategory === '') {
+				alert('Please select a category and subcategory.');
+				return;
+			} else if (
+				// Validate input, in case HTML5 validation did not work.
+				// Also needed for the select2 inputs.
+				[newProperties.category, newProperties.subcategory, newProperties.description]
+					.some(function(item) {
+					return !item.match(/^[a-zA-Z0-9,.()_ -]*$/);
+				})
+			) {
+				alert('The (sub)category name and group description fields may only contain letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).');
+				return;
+			}
+
+			var postData = {
+				group_name:        newProperties.name,
+				group_description: newProperties.description,
+				group_category:    newProperties.category,
+				group_subcategory: newProperties.subcategory,
+			};
+
+			if (action === 'update') {
+				var selectedGroup = this.groups[$($('#group-list .group.active')[0]).attr('data-name')];
+				['description', 'category', 'subcategory'].forEach(function(item) {
+					// Filter out fields that have not changed.
+					if (selectedGroup[item] === newProperties[item])
+						delete postData['group_' + item];
+				});
+			}
+
+			$.ajax({
+				url:      $(el).attr('action'),
+				type:     'post',
+				dataType: 'json',
+				data:     postData
+			}).done(function(result) {
+				if ('status' in result)
+					console.log('Group '+action+' completed with status ' + result.status);
+				if ('status' in result && result.status === 0) {
+					// OK! Make sure the newly added group is selected after reloading the page.
+					YodaPortal.storage.session.set('selected-group', postData.group_name);
+
+					// And give the user some feedback.
+					YodaPortal.storage.session.set('messages',
+						YodaPortal.storage.session.get('messages', []).concat({
+							type:    'success',
+							message: action === 'create'
+									 ? 'Created group ' + postData.group_name + '.'
+									 : 'Updated '       + postData.group_name + ' group properties.'
+						})
+					);
+
+					$(window).on('beforeunload', function() {
+						$(window).scrollTop(0);
+					});
+					window.location.reload(true);
+				} else {
+					// Something went wrong.
+					if ('message' in result)
+						alert(result.message);
+					else
+						alert(
+							  "Error: Could not "+action+" group due to an internal error.\n"
+							+ "Please contact a Yoda administrator"
+						);
+				}
+			}).fail(function() {
+				alert("Error: Could not create group due to an internal error.\nPlease contact a Yoda administrator");
+			});
+		},
+
+		/**
+		 * \brief User add form submission handler.
+		 *
+		 * Adds a user to the selected group.
+		 *
+		 * `this` is assumed to be the groupManager object, not the form element
+		 * that was submitted.
+		 *
+		 * \param el the form element
+		 * \param e  a submit event
+		 */
+		onSubmitUserCreate: function(el, e) {
+			e.preventDefault();
+
+			var groupName = $(el).find('#f-user-create-group').val();
+			var  userName = $(el).find('#f-user-create-name' ).val();
+
+			if (!userName.match(/^([a-z-]+|[a-z_.-]+@([a-z_-]+|[a-z_-][a-z_.-]*[a-z_-]))$/)) {
+				alert('Please enter an e-mail address or a name consisting only of lowercase letters, numbers, and hyphens (-).');
+				return;
+			}
+
+			var that = this;
+
+			$.ajax({
+				url:      $(el).attr('action'),
+				type:     'post',
+				dataType: 'json',
+				data: {
+					group_name: groupName,
+					 user_name: userName,
+				},
+			}).done(function(result) {
+				if ('status' in result)
+					console.log('User add completed with status ' + result.status);
+				if ('status' in result && result.status === 0) {
+					that.groups[groupName].members[userName] = {
+						isManager: false
+					};
+
+					$(el).find('#f-user-create-name').select2('val', '');
+					$(el).addClass('hidden');
+					$(el).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
+
+					that.deselectGroup();
+					that.selectGroup(groupName);
+					that.selectUser(userName);
+				} else {
+					// Something went wrong. :(
+					if ('message' in result)
+						alert(result.message);
+					else
+						alert(
+							  "Error: Could not add a user due to an internal error.\n"
+							+ "Please contact a Yoda administrator"
+						);
+				}
+			}).fail(function() {
+				alert("Error: Could not add a user due to an internal error.\nPlease contact a Yoda administrator");
+			});
+		},
+
+		/**
 		 * \brief Initialize the group manager module.
 		 *
 		 * The structure of the gruopHierarchy parameter is as follows:
@@ -477,7 +636,6 @@ $(function() {
 		 * \param groupHierarchy An object representing the category / group hierarchy visible to the user.
 		 *
 		 * \todo Generate the group list in JS just like the user list.
-		 * \todo Better organize this function.
 		 */
 		load: function(groupHierarchy) {
 			this.groupHierarchy = groupHierarchy;
@@ -533,7 +691,7 @@ $(function() {
 					that.selectUser($(this).attr('data-name'));
 			});
 
-			$userList.on('click', '.list-group-item:has(.placeholder-text)', function() {
+			$userList.on('click', '.list-group-item:has(.placeholder-text:not(.hidden))', function() {
 				// Show the user add form.
 				that.deselectUser();
 				$(this).find('.placeholder-text').addClass('hidden');
@@ -568,91 +726,25 @@ $(function() {
 				$('#f-group-create-name').focus();
 			});
 
+			// Group creation / update.
 			$('#f-group-create, #f-group-update').on('submit', function(e) {
-				e.preventDefault();
+				that.onSubmitGroupCreateOrUpdate(this, e);
+			});
 
-				var action =
-					$(this).attr('id') === 'f-group-create'
-					? 'create' : 'update';
+			// Adding users to groups.
+			$('#f-user-create').on('submit', function(e) {
+				that.onSubmitUserCreate(this, e);
+			});
 
-				var newProperties = {
-					name:          $(this).find('#f-group-'+action+'-name'     ).attr('data-prefix')
-					             + $(this).find('#f-group-'+action+'-name'     ).val(),
-					description: $(this).find('#f-group-'+action+'-description').val(),
-					category:    $(this).find('#f-group-'+action+'-category'   ).val(),
-					subcategory: $(this).find('#f-group-'+action+'-subcategory').val(),
-				};
+			$('#f-user-create').on('keypress', '.select2-chosen', function(e) {
+				// NOTE: This requires a patched select2.js where a key event is
+				// not killEvent()ed when openOnEnter is false.
 
-				if (newProperties.category === '' || newProperties.subcategory === '') {
-					alert('Please select a category and subcategory.');
-					return;
-				} else if (
-					// Validate input, in case HTML5 validation did not work.
-					// Also needed for the select2 inputs.
-					[newProperties.category, newProperties.subcategory, newProperties.description]
-						.some(function(item) {
-						return !item.match(/^[a-zA-Z0-9,.()_ -]*$/);
-					})
-				) {
-					alert('The (sub)category name and group description fields may only contain letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).');
-					return;
+				if (e.which === 13) {
+					// On 'Enter'.
+					$(this).submit();
+					e.stopPropagation();
 				}
-
-				var postData = {
-					group_name:        newProperties.name,
-					group_description: newProperties.description,
-					group_category:    newProperties.category,
-					group_subcategory: newProperties.subcategory,
-				};
-
-				if (action === 'update') {
-					var selectedGroup = that.groups[$($('#group-list .group.active')[0]).attr('data-name')];
-					['description', 'category', 'subcategory'].forEach(function(item) {
-						// Filter out fields that have not changed.
-						if (selectedGroup[item] === newProperties[item])
-							delete postData['group_' + item];
-					});
-				}
-
-				$.ajax({
-					url:      $(this).attr('action'),
-					type:     'post',
-					dataType: 'json',
-					data:     postData
-				}).done(function(result) {
-					if ('status' in result)
-						console.log('Group '+action+' completed with status ' + result.status);
-					if ('status' in result && result.status === 0) {
-						// OK! Make sure the newly added group is selected after reloading the page.
-						YodaPortal.storage.session.set('selected-group', postData.group_name);
-
-						// And give the user some feedback.
-						YodaPortal.storage.session.set('messages',
-							YodaPortal.storage.session.get('messages', []).concat({
-								type:    'success',
-								message: action === 'create'
-								         ? 'Created group ' + postData.group_name + '.'
-								         : 'Updated '       + postData.group_name + ' group properties.'
-							})
-						);
-
-						$(window).on('beforeunload', function() {
-							$(window).scrollTop(0);
-						});
-						window.location.reload(true);
-					} else {
-						// Something went wrong.
-						if ('message' in result)
-							alert(result.message);
-						else
-							alert(
-								  "Error: Could not "+action+" group due to an internal error.\n"
-								+ "Please contact a Yoda administrator"
-							);
-					}
-				}).fail(function() {
-					alert("Error: Could not create group due to an internal error.\nPlease contact a Yoda administrator");
-				});
 			});
 
 			// Group list search.
