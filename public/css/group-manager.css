@@ -116,3 +116,18 @@ i.form-control-feedback.glyphicon {
 .list-group-item.filtered {
 	display: none;
 }
+
+.list-group-item.blink-once {
+	-webkit-animation: blink-once 1s;
+	   -moz-animation: blink-once 1s;
+	        animation: blink-once 1s;
+}
+
+@-webkit-keyframes blink-once {
+	from { background-color: rgba(255,220,50,1.0); }
+	to   { background-color: rgba(255,220,50,0.0); }
+}
+@keyframes blink-once {
+	from { background-color: rgba(255,220,50,1.0); }
+	to   { background-color: rgba(255,220,50,0.0); }
+}

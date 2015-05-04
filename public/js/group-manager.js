@@ -29,7 +29,7 @@ $(function() {
 		 * \return
 		 */
 		isMember: function(groupName, userName) {
-			return groupName in this.groups && this.groups[groupName].members.hasOwnProperty(userName);
+			return groupName in this.groups && userName in this.groups[groupName].members;
 		},
 
 		/**
@@ -108,7 +108,8 @@ $(function() {
 
 			var that = this;
 
-			// Build the group properties panel.
+			// Build the group properties panel {{{
+
 			(function(){
 				var $groupProperties = $('#group-properties');
 
@@ -147,7 +148,9 @@ $(function() {
 					.toggleClass('hidden', !userIsManager);
 			})();
 
-			// Build the user list panel.
+			// }}}
+			// Build the user list panel {{{
+
 			(function(){
 				var users = that.groups[groupName].members;
 
@@ -224,7 +227,7 @@ $(function() {
 				$userPanel.find('.update-button, .delete-button').addClass('disabled');
 			})();
 
-			//$($groupList.parents('.panel')[0]).find('.delete-button').removeClass('disabled');
+			// }}}
 		},
 
 		/**
@@ -287,10 +290,12 @@ $(function() {
 		},
 
 		/**
-		 * \brief Turn certain inputs into select2 inputs.
+		 * \brief Turn certain inputs into select2 inputs with autocompletion.
 		 */
 		selectifyInputs: function(sel) {
 			var that = this;
+
+			// Category fields {{{
 
 			$(sel).filter('.selectify-category').each(function() {
 				var $el = $(this);
@@ -367,6 +372,9 @@ $(function() {
 				});
 			});
 
+			// }}}
+			// Subcategory fields {{{
+
 			$(sel).filter('.selectify-subcategory').each(function() {
 				var $el = $(this);
 
@@ -420,6 +428,9 @@ $(function() {
 					$(this).select2('val', '');
 				});
 			});
+
+			// }}}
+			// Username fields {{{
 
 			$(sel).filter('.selectify-user-name').each(function() {
 				var $el = $(this);
@@ -479,6 +490,8 @@ $(function() {
 					$(this).select2('val', '');
 				});
 			});
+
+			// }}}
 		},
 
 		/**
@@ -652,6 +665,71 @@ $(function() {
 		},
 
 		/**
+		 * \brief Handle a change role button click event.
+		 *
+		 * `this` is assumed to be the groupManager object, not the form element
+		 * that was submitted.
+		 *
+		 * \param el
+		 * \param e
+		 */
+		onClickUserUpdate: function(el, e) {
+			var that = this;
+
+			var groupName = $('#group-list .group.active').attr('data-name');
+			var  userName = $('#user-list   .user.active').attr('data-name');
+
+			$('#user-list .user.active')
+				.addClass('update-pending disabled')
+				.attr('title', 'Update pending');
+			this.deselectUser();
+
+			$.ajax({
+				url:      $(el).attr('data-action'),
+				type:     'post',
+				dataType: 'json',
+				data: {
+					group_name: groupName,
+					 user_name: userName,
+					new_role:
+						// Toggle.
+						that.groups[groupName].members[userName].isManager
+						? 'user' : 'manager'
+				},
+			}).done(function(result) {
+				if ('status' in result)
+					console.log('User update completed with status ' + result.status);
+				if ('status' in result && result.status === 0) {
+					that.groups[groupName].members[userName].isManager
+						= !that.groups[groupName].members[userName].isManager;
+
+					// Force-regenerate the user list.
+					that.deselectGroup();
+					that.selectGroup(groupName);
+
+					// Give a visual hint that the user was updated.
+					$('#user-list .user[data-name="' + userName + '"]').addClass('blink-once');
+				} else {
+					// Something went wrong. :(
+
+					$('#user-list .user.update-pending[data-name="' + userName + '"]')
+						.removeClass('update-pending disabled')
+						.attr('title', '');
+
+					if ('message' in result)
+						alert(result.message);
+					else
+						alert(
+							  "Error: Could not change the role for the selected user due to an internal error.\n"
+							+ "Please contact a Yoda administrator"
+						);
+				}
+			}).fail(function() {
+				alert("Error: Could not change the role for the selected user due to an internal error.\nPlease contact a Yoda administrator");
+			});
+		},
+
+		/**
 		 * \brief Handle a user delete button click event.
 		 *
 		 * `this` is assumed to be the groupManager object, not the form element
@@ -666,7 +744,9 @@ $(function() {
 			var groupName = $('#group-list .group.active').attr('data-name');
 			var  userName = $('#user-list   .user.active').attr('data-name');
 
-			$('#user-list .user.active').addClass('disabled').attr('title', 'Removal pending');
+			$('#user-list .user.active')
+				.addClass('delete-pending disabled')
+				.attr('title', 'Removal pending');
 			this.deselectUser();
 
 			var that = this;
@@ -685,10 +765,15 @@ $(function() {
 				if ('status' in result && result.status === 0) {
 					delete that.groups[groupName].members[userName];
 
+					// Force-regenerate the user list.
 					that.deselectGroup();
 					that.selectGroup(groupName);
 				} else {
 					// Something went wrong. :(
+
+					// Re-enable user list entry.
+					$('#user-list .user.delete-pending[data-name="' + userName + '"]').removeClass('delete-pending disabled').attr('title', '');
+
 					if ('message' in result)
 						alert(result.message);
 					else
@@ -705,7 +790,7 @@ $(function() {
 		/**
 		 * \brief Initialize the group manager module.
 		 *
-		 * The structure of the gruopHierarchy parameter is as follows:
+		 * The structure of the groupHierarchy parameter is as follows:
 		 *
 		 *     {
 		 *       'CATEGORY_NAME': {
@@ -729,6 +814,7 @@ $(function() {
 		load: function(groupHierarchy) {
 			this.groupHierarchy = groupHierarchy;
 			this.groups = (function(hier) {
+				// Create a flat group map based on the hierarchy object.
 				var groups = { };
 				for (var categoryName in hier)
 					for (var subcategoryName in hier[categoryName])
@@ -747,6 +833,7 @@ $(function() {
 			var $groupList = $('#group-list');
 
 			// Attach event handlers {{{
+			// Group list {{{
 
 			$groupList.on('show.bs.collapse', function(e) {
 				$(e.target).parent('.category').find('.triangle')
@@ -764,92 +851,6 @@ $(function() {
 					that.deselectGroup();
 				else
 					that.selectGroup($(this).attr('data-name'));
-			});
-
-			$('.panel.groups').on('click', '.create-button', function() {
-				//that.deselectGroup();
-			});
-
-			this.selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
-
-			var $userList = $('#user-list');
-			$userList.on('click', 'a.user:not(.disabled)', function() {
-				if ($(this).is($userList.find('.active')))
-					that.deselectUser();
-				else
-					that.selectUser($(this).attr('data-name'));
-			});
-
-			$userList.on('click', '.list-group-item:has(.placeholder-text:not(.hidden))', function() {
-				// Show the user add form.
-				that.deselectUser();
-				$(this).find('.placeholder-text').addClass('hidden');
-				$(this).find('form').removeClass('hidden');
-				$(this).find('form').find('#f-user-create-name').select2('open');
-			});
-
-			$('#f-user-create-name').on('select2-close', function() {
-				// Remove the new user name input on unfocus if nothing was entered.
-				if ($(this).val().length === 0) {
-					$(this).parents('form').addClass('hidden');
-					$(this).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
-				}
-			});
-
-			$('#modal-group-create').on('show.bs.modal', function() {
-				$('#f-group-create-name')       .val('').attr('data-prefix', 'grp-');
-				$('#f-group-create-description').val('');
-				var $selectedGroup = $('#group-list .group.active');
-				if ($selectedGroup.length) {
-					var groupName = $($selectedGroup[0]).attr('data-name');
-					// Fill in the (sub)category of the currently selected group.
-					$('#f-group-create-category')   .select2('val', that.groups[groupName].category);
-					$('#f-group-create-subcategory').select2('val', that.groups[groupName].subcategory);
-				} else {
-					$('#f-group-create-category')   .select2('val', '');
-					$('#f-group-create-subcategory').select2('val', '');
-				}
-			});
-			$('#modal-group-create').on('shown.bs.modal', function() {
-				// Auto-focus group name in group add dialog.
-				$('#f-group-create-name').focus();
-			});
-
-			// Group creation / update.
-			$('#f-group-create, #f-group-update').on('submit', function(e) {
-				that.onSubmitGroupCreateOrUpdate(this, e);
-			});
-
-			// Adding users to groups.
-			$('#f-user-create').on('submit', function(e) {
-				that.onSubmitUserCreate(this, e);
-			});
-
-			// Remove users from groups.
-			$('#modal-user-delete .confirm').on('click', function(e) {
-				that.onClickUserDelete($('.users.panel .delete-button')[0]);
-				$('#modal-user-delete').modal('hide');
-			});
-
-			$('#modal-user-delete').on('show.bs.modal', function() {
-				var groupName = $('#group-list .group.active').attr('data-name');
-				var  userName = $('#user-list  .user.active').attr('data-name');
-				$(this).find('.group').text(groupName);
-				$(this).find('.user').text(userName);
-			});
-
-			if (YodaPortal.storage.session.get('confirm-user-delete', false))
-				this.removeUserDeleteConfirmationModal();
-
-			$('#f-user-create').on('keypress', '.select2-chosen', function(e) {
-				// NOTE: This requires a patched select2.js where a key event is
-				// not killEvent()ed when openOnEnter is false.
-
-				if (e.which === 13) {
-					// On 'Enter'.
-					$(this).submit();
-					e.stopPropagation();
-				}
 			});
 
 			// Group list search.
@@ -885,6 +886,97 @@ $(function() {
 				 */
 			});
 
+			// Group creation {{{
+
+			$('#modal-group-create').on('show.bs.modal', function() {
+				$('#f-group-create-name')       .val('').attr('data-prefix', 'grp-');
+				$('#f-group-create-description').val('');
+				var $selectedGroup = $('#group-list .group.active');
+				if ($selectedGroup.length) {
+					var groupName = $($selectedGroup[0]).attr('data-name');
+					// Fill in the (sub)category of the currently selected group.
+					$('#f-group-create-category')   .select2('val', that.groups[groupName].category);
+					$('#f-group-create-subcategory').select2('val', that.groups[groupName].subcategory);
+				} else {
+					$('#f-group-create-category')   .select2('val', '');
+					$('#f-group-create-subcategory').select2('val', '');
+				}
+			});
+			$('#modal-group-create').on('shown.bs.modal', function() {
+				// Auto-focus group name in group add dialog.
+				$('#f-group-create-name').focus();
+			});
+
+			// Group creation / update.
+			$('#f-group-create, #f-group-update').on('submit', function(e) {
+				that.onSubmitGroupCreateOrUpdate(this, e);
+			});
+
+			// }}}
+			// }}}
+			// User list {{{
+
+			var $userList = $('#user-list');
+			$userList.on('click', 'a.user:not(.disabled)', function() {
+				if ($(this).is($userList.find('.active')))
+					that.deselectUser();
+				else
+					that.selectUser($(this).attr('data-name'));
+			});
+
+			$userList.on('click', '.list-group-item:has(.placeholder-text:not(.hidden))', function() {
+				// Show the user add form.
+				that.deselectUser();
+				$(this).find('.placeholder-text').addClass('hidden');
+				$(this).find('form').removeClass('hidden');
+				$(this).find('form').find('#f-user-create-name').select2('open');
+			});
+
+			$('#f-user-create-name').on('select2-close', function() {
+				// Remove the new user name input on unfocus if nothing was entered.
+				if ($(this).val().length === 0) {
+					$(this).parents('form').addClass('hidden');
+					$(this).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
+				}
+			});
+
+			// Adding users to groups.
+			$('#f-user-create').on('submit', function(e) {
+				that.onSubmitUserCreate(this, e);
+			});
+
+			// Changing user roles.
+			$('.users.panel .update-button').on('click', function(e) {
+				that.onClickUserUpdate(this, e);
+			});
+
+			// Remove users from groups.
+			$('#modal-user-delete .confirm').on('click', function(e) {
+				that.onClickUserDelete($('.users.panel .delete-button')[0]);
+				$('#modal-user-delete').modal('hide');
+			});
+
+			$('#modal-user-delete').on('show.bs.modal', function() {
+				var groupName = $('#group-list .group.active').attr('data-name');
+				var  userName = $('#user-list  .user.active').attr('data-name');
+				$(this).find('.group').text(groupName);
+				$(this).find('.user').text(userName);
+			});
+
+			if (YodaPortal.storage.session.get('confirm-user-delete', false))
+				this.removeUserDeleteConfirmationModal();
+
+			$('#f-user-create').on('keypress', '.select2-chosen', function(e) {
+				// NOTE: This requires a patched select2.js where a key event is
+				// not killEvent()ed when openOnEnter is false.
+
+				if (e.which === 13) {
+					// On 'Enter'.
+					$(this).submit();
+					e.stopPropagation();
+				}
+			});
+
 			// User list search.
 			$('#user-list-search').on('keyup', function() {
 				var $users  = $('.panel.users .user');
@@ -899,6 +991,9 @@ $(function() {
 			});
 
 			// }}}
+			// }}}
+
+			this.selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
 
 			if (this.isMember('priv-group-add', YodaPortal.user.userName)) {
 				var $groupPanel = $('.panel.groups');
@@ -914,7 +1009,7 @@ $(function() {
 			}
 
 			var selectedGroup = YodaPortal.storage.session.get('selected-group');
-			if (selectedGroup !== null && this.groups.hasOwnProperty(selectedGroup)) {
+			if (selectedGroup !== null && selectedGroup in this.groups) {
 				// Automatically select the last selected group within this session (bound to this tab).
 				this.selectGroup(selectedGroup);
 			}
