@@ -445,14 +445,13 @@ $(function() {
 
 							users.forEach(function(userName) {
 								// Exclude users already in the group.
-								if (!(userName in that.groups[$($el.attr('data-group')).val()].members)) {
+								if (!(userName in that.groups[$($el.attr('data-group')).val()].members))
 									results.push({
 										id:   userName,
 										text: userName
 									});
-									if (query === userName)
-										inputMatches = true;
-								}
+								if (query === userName)
+									inputMatches = true;
 							});
 
 							if (!inputMatches && query.length)
