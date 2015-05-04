@@ -26,7 +26,7 @@ $config['base_url']	= '';
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = '';
 
 /*
 |--------------------------------------------------------------------------
@@ -244,7 +244,7 @@ $config['encryption_key'] = '';
 | 'sess_time_to_update'		= how many seconds between CI refreshing Session Information
 |
 */
-$config['sess_cookie_name']		= 'ci_session';
+$config['sess_cookie_name']		= 'yoda_session';
 $config['sess_expiration']		= 7200;
 $config['sess_expire_on_close']	= FALSE;
 $config['sess_encrypt_cookie']	= FALSE;
@@ -357,6 +357,22 @@ $config['rewrite_short_tags'] = FALSE;
 */
 $config['proxy_ips'] = '';
 
+// Yoda Portal configuration {{{
+
+// These config lines may be overridden by putton them in a config_local.php file.
+$config['rodsServerAddress']   = 'localhost';
+$config['rodsServerPort']      = 1247;
+$config['rodsServerZone']      = 'tempZone';
+$config['rodsDefaultResource'] = 'demoResc1';
+$config['rodsAuthType']        = 'STANDARD'; // Either STANDARD or PAM.
+
+// This must be set to a 32-byte random value in config_local.php
+$config['encryption_key']      = '';
+
+if (file_exists(dirname(__FILE__) . '/config_local.php'))
+	include(dirname(__FILE__) . '/config_local.php');
+
+// }}}
 
 /* End of file config.php */
 /* Location: ./application/config/config.php */

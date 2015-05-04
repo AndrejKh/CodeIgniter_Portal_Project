@@ -116,7 +116,7 @@ $(function() {
 				$groupProperties.find('.placeholder-text').addClass('hidden');
 				$groupProperties.find('form').removeClass('hidden');
 
-				var userIsManager = that.isManager(groupName, YodaPortal.user.userName);
+				var userIsManager = that.isManager(groupName, YodaPortal.user.username);
 
 				$groupProperties.find('#f-group-update-category')
 					.select2('data', { id: group.category, text: group.category })
@@ -182,7 +182,7 @@ $(function() {
 					$user.attr('id', 'user-' + i);
 					$user.addClass(user.isManager ? 'manager' : 'regular');
 					$user.attr('data-name', userName);
-					if (userName === YodaPortal.user.userName)
+					if (userName === YodaPortal.user.username)
 						$user.addClass('disabled')
 							 .addClass('self')
 							 .attr('title', 'You cannot change your own role or remove yourself from this group.');
@@ -210,7 +210,7 @@ $(function() {
 				// Move the user creation item to the bottom of the list.
 				var $userCreateItem = $userList.find('.item-user-create');
 				$userCreateItem.appendTo($userList);
-				$userCreateItem.toggleClass('hidden', !that.isManager(groupName, YodaPortal.user.userName));
+				$userCreateItem.toggleClass('hidden', !that.isManager(groupName, YodaPortal.user.username));
 
 				$userList.find('#f-user-create-group').val(groupName);
 
@@ -274,7 +274,7 @@ $(function() {
 			$userList.find('.active').removeClass('active');
 			$user.addClass('active');
 
-			if (this.isManager($('#group-list .active.group').attr('data-name'), YodaPortal.user.userName)) {
+			if (this.isManager($('#group-list .active.group').attr('data-name'), YodaPortal.user.username)) {
 				var $userPanel = $('.panel.users');
 				$userPanel.find('.update-button, .delete-button').removeClass('disabled');
 			}
@@ -302,7 +302,7 @@ $(function() {
 
 				$el.attr(
 					'placeholder',
-					that.isMember('priv-category-add', YodaPortal.user.userName)
+					that.isMember('priv-category-add', YodaPortal.user.username)
 						? 'Select one or enter a new name'
 						: 'Select a category'
 				);
@@ -325,7 +325,7 @@ $(function() {
 								if (query === category)
 									inputMatches = true;
 
-								if (that.isManagerInCategory(category, YodaPortal.user.userName))
+								if (that.isManagerInCategory(category, YodaPortal.user.username))
 									results.push({
 										id:   category,
 										text: category,
@@ -342,7 +342,7 @@ $(function() {
 							if (
 								  !inputMatches
 								&& query.length
-								&& that.isMember('priv-category-add', YodaPortal.user.userName)
+								&& that.isMember('priv-category-add', YodaPortal.user.username)
 							) {
 								results.push({
 									id:     query,
@@ -995,14 +995,14 @@ $(function() {
 
 			this.selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
 
-			if (this.isMember('priv-group-add', YodaPortal.user.userName)) {
+			if (this.isMember('priv-group-add', YodaPortal.user.username)) {
 				var $groupPanel = $('.panel.groups');
 				$groupPanel.find('.create-button').removeClass('disabled');
 			}
 
 			// Indicate which groups are managed by this user.
 			for (var groupName in this.groups) {
-				if (this.isManager(groupName, YodaPortal.user.userName))
+				if (this.isManager(groupName, YodaPortal.user.username))
 					$('#group-list .group[data-name="' + groupName + '"]').append(
 						'<span class="pull-right glyphicon glyphicon-tower" title="You manage this group"></span>'
 					);

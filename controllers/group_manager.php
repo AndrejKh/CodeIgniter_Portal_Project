@@ -2,36 +2,10 @@
 
 class Group_Manager extends CI_Controller {
 
-	protected $_account;
 	protected $_groups;        /// `[ group... ]`.
 	protected $_categories;    /// `[ category... ]`.
 	protected $_subcategories; /// `category => [ subcategory... ]...`.
 
-	protected function _getAccount() {
-		if (isset($this->_account))
-			return $this->_account;
-		else
-			return $this->_account = new RODSAccount
-				($this->_getIrodsHost()
-				,$this->_getIrodsPort()
-				,$this->_getUserName()
-				,$this->_getPassword());
-	}
-
-	protected function _getIrodsHost() {
-		// TODO: Use a configuration system.
-		// TODO: Move modelly stuff to models.
-		return 'pax-vm-uu';
-	}
-	protected function _getIrodsPort() {
-		return 1247;
-	}
-	protected function _getUserName() {
-		return 'chrisdm';
-	}
-	protected function _getPassword() {
-		return 'chris';
-	}
 	protected function _getUserGroups() {
 		if (isset($this->_groups)) {
 			return $this->_groups;
@@ -42,10 +16,10 @@ rule {
 }
 EORULE;
 			$rule = new ProdsRule(
-				$this->_getAccount(),
+				$this->rodsuser->getRodsAccount(),
 				$ruleBody,
 				array(
-					'*user' => $this->_getUserName()
+					'*user' => $this->rodsuser->getUsername()
 				),
 				array(
 					'*groups'
@@ -67,7 +41,7 @@ rule {
 }
 EORULE;
 			$rule = new ProdsRule(
-				$this->_getAccount(),
+				$this->rodsuser->getRodsAccount(),
 				$ruleBody,
 				array(),
 				array(
@@ -94,7 +68,7 @@ rule {
 }
 EORULE;
 			$rule = new ProdsRule(
-				$this->_getAccount(),
+				$this->rodsuser->getRodsAccount(),
 				$ruleBody,
 				array(
 					'*category' => $category
@@ -119,7 +93,7 @@ rule {
 }
 EORULE;
 			$rule = new ProdsRule(
-				$this->_getAccount(),
+				$this->rodsuser->getRodsAccount(),
 				$ruleBody,
 				array(),
 				array(
@@ -142,7 +116,7 @@ rule {
 }
 EORULE;
 			$rule = new ProdsRule(
-				$this->_getAccount(),
+				$this->rodsuser->getRodsAccount(),
 				$ruleBody,
 				array(
 					'*query' => $query,
@@ -164,7 +138,7 @@ rule {
 }
 EORULE;
 		$rule = new ProdsRule(
-			$this->_getAccount(),
+			$this->rodsuser->getRodsAccount(),
 			$ruleBody,
 			array(
 				'*groupName' => $groupName,
@@ -187,7 +161,7 @@ rule {
 }
 EORULE;
 		$rule = new ProdsRule(
-			$this->_getAccount(),
+			$this->rodsuser->getRodsAccount(),
 			$ruleBody,
 			array(
 				'*groupName' => $groupName,
@@ -295,7 +269,7 @@ rule {
 }
 EORULE;
 		$rule = new ProdsRule(
-			$this->_getAccount(),
+			$this->rodsuser->getRodsAccount(),
 			$ruleBody,
 			array(
 				'*groupName' => $this->input->post('group_name'),
@@ -325,7 +299,7 @@ rule {
 }
 EORULE;
 		$rule = new ProdsRule(
-			$this->_getAccount(),
+			$this->rodsuser->getRodsAccount(),
 			$ruleBody,
 			array(
 				'*groupName'   => $this->input->post('group_name'),
@@ -365,7 +339,7 @@ rule {
 }
 EORULE;
 			$rule = new ProdsRule(
-				$this->_getAccount(),
+				$this->rodsuser->getRodsAccount(),
 				$ruleBody,
 				array(
 					'*groupName' => $this->input->post('group_name'),
@@ -405,7 +379,7 @@ rule {
 }
 EORULE;
 		$rule = new ProdsRule(
-			$this->_getAccount(),
+			$this->rodsuser->getRodsAccount(),
 			$ruleBody,
 			array(
 				'*groupName' => $this->input->post('group_name'),
@@ -434,7 +408,7 @@ rule {
 }
 EORULE;
 		$rule = new ProdsRule(
-			$this->_getAccount(),
+			$this->rodsuser->getRodsAccount(),
 			$ruleBody,
 			array(
 				'*groupName' => $this->input->post('group_name'),
@@ -464,7 +438,7 @@ rule {
 }
 EORULE;
 		$rule = new ProdsRule(
-			$this->_getAccount(),
+			$this->rodsuser->getRodsAccount(),
 			$ruleBody,
 			array(
 				'*groupName' => $this->input->post('group_name'),
@@ -489,25 +463,36 @@ EORULE;
 		$categories = $this->_getCategories();
 		$groups = $this->_getUserGroups();
 
-		$this->load->view('common-start', [
-			 'style_includes' => ['css/group-manager.css'],
-			'script_includes' => ['js/group-manager.js'],
-			'user'   => array(
-				'userName' => $this->_getUserName(),
+		$this->load->view('common-start', array(
+			 'style_includes' => array('css/group-manager.css'),
+			'script_includes' => array('js/group-manager.js'),
+			'active_module'   => 'group-manager',
+			'user' => array(
+				'username' => $this->rodsuser->getUsername(),
 			),
-		]);
-		$this->load->view('common-header', [
-			'active_module' => 'group-manager',
-		]);
+		));
 		$this->load->view('group-manager_index', [
 			'groupHierarchy' => $this->_getGroupHierarchy(),
 		]);
-		$this->load->view('common-footer');
 		$this->load->view('common-end');
 	}
 
 	public function __construct() {
 		parent::__construct();
 		$this->load->library('prods');
+		$this->load->library('session');
+		$this->load->model('rodsuser');
+
+		if (
+			   $this->session->userdata('username') !== false
+			&& $this->session->userdata('password') !== false
+		) {
+			$this->rodsuser->getRodsAccount(
+				$this->session->userdata('username'),
+				$this->session->userdata('password')
+			);
+		}
+		if (!$this->rodsuser->isLoggedIn())
+			redirect('user/login');
 	}
 }
