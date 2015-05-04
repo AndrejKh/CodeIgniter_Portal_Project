@@ -33,6 +33,8 @@
 
 <div class="container-fluid portal-chooser">
 	<div class="row">
+		<div class="col-xs-12 col-md-2">
+		</div>
 <?php
 
 	global $YODA_MODULES; // FIXME.
@@ -55,11 +57,7 @@
 <div class="jumbotron">
 	<h1>Welcome to Yoda!</h1>
 	<p>
-		Yoda is a share-collaborate environment blah blah blah yadayada.
+		Yoda is a share-collaborate environment for research data.
 	</p>
-	<a class="btn btn-default" href="#">Learn more</a>
+	<!--<a class="btn btn-default" href="#">Learn more</a>-->
 </div>
-<h1>Data!</h1>
-<p>
-Data data data data data data data.
-</p>

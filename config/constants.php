@@ -38,16 +38,12 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 
 $YODA_MODULES = [
 	'intake' => [
-		'label'      => 'Data Intake',
+		'label'      => 'Intake Area',
 		'icon_class' => 'glyphicon glyphicon-saved',
 	],
 	'group-manager' => [
 		'label'      => 'Group Manager',
 		'icon_class' => 'glyphicon glyphicon-user'
-	],
-	'release' => [
-		'label'      => 'Data Release',
-		'icon_class' => 'glyphicon glyphicon-export',
 	],
 ];
 
