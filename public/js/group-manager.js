@@ -665,11 +665,12 @@ $(function() {
 			}
 
 			var groupName = $('#group-list .group.active').attr('data-name');
-			var  userName = $('#user-list  .user.active').attr('data-name');
+			var  userName = $('#user-list   .user.active').attr('data-name');
+
+			$('#user-list .user.active').addClass('disabled').attr('title', 'Removal pending');
+			this.deselectUser();
 
 			var that = this;
-
-			console.log(el);
 
 			$.ajax({
 				url:      $(el).attr('data-action'),
