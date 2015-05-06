@@ -27,8 +27,8 @@ class User extends CI_Controller {
 			}
 		}
 		$this->load->view('common-start', array(
-			 'style_includes' => array(),
-			'script_includes' => array(),
+			 'styleIncludes' => array(),
+			'scriptIncludes' => array(),
 			'user' => array(
 				'username' => $this->rodsuser->getUsername(),
 			),

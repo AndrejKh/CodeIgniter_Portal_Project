@@ -4,10 +4,14 @@ class Intake extends CI_Controller {
 
 	public function index()
 	{
+		// TODO: Integrate portals, remove redirect.
+		redirect(base_url() . '../portal-intake');
+		return;
+
 		$this->load->view('common-start', array(
-			 'style_includes' => array('intake.css'),
-			'script_includes' => array('intake.js'),
-			'active_module'   => 'intake',
+			 'styleIncludes' => array('intake.css'),
+			'scriptIncludes' => array('intake.js'),
+			'activeModule'   => 'intake',
 			'user' => array(
 				'username' => $this->rodsuser->getUsername(),
 			),

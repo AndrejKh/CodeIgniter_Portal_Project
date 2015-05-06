@@ -36,16 +36,16 @@ define('FOPEN_READ_WRITE_CREATE',				'a+b');
 define('FOPEN_WRITE_CREATE_STRICT',				'xb');
 define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 
-$YODA_MODULES = [
-	'intake' => [
+$YODA_MODULES = array(
+	'intake' => array(
 		'label'      => 'Intake Area',
 		'icon_class' => 'glyphicon glyphicon-saved',
-	],
-	'group-manager' => [
+	),
+	'group-manager' => array(
 		'label'      => 'Group Manager',
 		'icon_class' => 'glyphicon glyphicon-user'
-	],
-];
+	),
+);
 
 /* End of file constants.php */
 /* Location: ./application/config/constants.php */

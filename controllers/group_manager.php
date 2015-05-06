@@ -464,9 +464,9 @@ EORULE;
 		$groups = $this->_getUserGroups();
 
 		$this->load->view('common-start', array(
-			 'style_includes' => array('css/group-manager.css'),
-			'script_includes' => array('js/group-manager.js'),
-			'active_module'   => 'group-manager',
+			 'styleIncludes' => array('css/group-manager.css'),
+			'scriptIncludes' => array('js/group-manager.js'),
+			'activeModule'   => 'group-manager',
 			'user' => array(
 				'username' => $this->rodsuser->getUsername(),
 			),
