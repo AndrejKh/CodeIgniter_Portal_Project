@@ -35,8 +35,8 @@ class User extends CI_Controller {
 			'loginFailed'  => $loginFailed,
 			'activeModule' => 'login',
 		));
-		$this->load->view('user_login', [
-		]);
+		$this->load->view('user_login', array(
+		));
 		$this->load->view('common-end');
 	}
 
