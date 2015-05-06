@@ -150,8 +150,8 @@ $(function() {
 			</div>
 			<div class="panel-footer clearfix" style="border-top: 1px solid #ddd;">
 				<div class="input-group-sm pull-left">
-					<a class="btn btn-sm btn-primary disabled update-button" data-action="/group-manager/user-update" title="Change whether the selected user is a manager in this group">Change role</a>
-					<a class="btn btn-sm btn-danger disabled delete-button" data-action="/group-manager/user-delete" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove</a>
+					<a class="btn btn-sm btn-primary disabled update-button" data-action="<?=base_url('group-manager/user-update')?>" title="Change whether the selected user is a manager in this group">Change role</a>
+					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?=base_url('group-manager/user-delete')?>" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove</a>
 				</div>
 			</div>
 		</div>

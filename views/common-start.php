@@ -32,9 +32,16 @@
 ?>
 	<script>
 		$(function() {
+			YodaPortal.extend('baseUrl', '<?= base_url() ?>');
+<?php
+	if (isset($user) && isset($user['username'])) {
+?>
 			YodaPortal.extend('user', {
 				username: '<?=$user['username']?>',
 			});
+<?php
+	}
+?>
 		});
 	</script>
 <?php
@@ -78,7 +85,7 @@ global $YODA_MODULES; // FIXME.
 			</div>
 			<?php } else { ?>
 			<div class="navbar-form navbar-right">
-					<a class="btn btn-primary" href="/user/login">Sign in</a>
+				<a class="btn btn-primary" href="<?=base_url('user/login')?>">Sign in</a>
 			</div>
 			<?php } ?>
 		</div>

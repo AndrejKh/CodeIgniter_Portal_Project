@@ -310,7 +310,7 @@ $(function() {
 				$el.select2({
 					ajax: {
 						quietMillis: 200,
-						url:      '/group-manager/get-categories',
+						url:      YodaPortal.baseUrl + 'group-manager/get-categories',
 						type:     'get',
 						dataType: 'json',
 						data: function (term, page) {
@@ -381,7 +381,7 @@ $(function() {
 				$el.select2({
 					ajax: {
 						quietMillis: 200,
-						url:      '/group-manager/get-subcategories',
+						url:      YodaPortal.baseUrl + 'group-manager/get-subcategories',
 						type:     'get',
 						dataType: 'json',
 						data: function (term, page) {
@@ -441,7 +441,7 @@ $(function() {
 					minimumInputLength: 4,
 					ajax: {
 						quietMillis: 400,
-						url:      '/group-manager/get-users',
+						url:      YodaPortal.baseUrl + 'group-manager/get-users',
 						type:     'get',
 						dataType: 'json',
 						data: function (term, page) {
