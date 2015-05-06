@@ -12,7 +12,8 @@ class Group_Manager extends CI_Controller {
 		} else {
 			$ruleBody = <<<EORULE
 rule {
-	uuGroupMemberships(*user, *groups);
+	uuGroupMemberships(*user, *groupsList);
+	uuJoin(',', *groupsList, *groups);
 }
 EORULE;
 			$rule = new ProdsRule(
