@@ -4,12 +4,15 @@
 <div class="row">
 	<div class="col-md-offset-2 col-md-8">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">Login to Yoda</h3>
+			</div>
 			<div class="panel-body">
 				<form method="POST" class="form-horizontal" id="f-login">
 					<div class="form-group">
 						<label class="col-sm-3 control-label" for="f-login-username">Username</label>
 						<div class="col-sm-9">
-							<input name="username" id="f-login-username" class="form-control" type="text" placeholder="t.e.ster@uu.nl" required />
+							<input name="username" id="f-login-username" class="form-control" type="text" required />
 						</div>
 					</div>
 					<div class="form-group">
