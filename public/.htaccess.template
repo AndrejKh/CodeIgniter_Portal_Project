@@ -10,4 +10,4 @@ SetEnvIf YODA_CODEIGNITER_ROOT ^$ YODA_CODEIGNITER_ROOT=../../CodeIgniter
 ## CI_APPLICATION: A relative path from the codeigniter directory to the application directory
 ##                 (i.e. from /.../codeigniter/ to /.../portal-repo/).
 ##                 No trailing slashes.
-SetEnvIf CI_APPLICATION ^$ CI_APPLICATION=../portal-groups
+SetEnvIf CI_APPLICATION ^$ CI_APPLICATION=../yoda-portal-group-manager
