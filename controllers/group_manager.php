@@ -471,9 +471,9 @@ EORULE;
 				'username' => $this->rodsuser->getUsername(),
 			),
 		));
-		$this->load->view('group-manager_index', [
+		$this->load->view('group-manager_index', array(
 			'groupHierarchy' => $this->_getGroupHierarchy(),
-		]);
+		));
 		$this->load->view('common-end');
 	}
 
