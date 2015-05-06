@@ -1,6 +1,6 @@
 <script>
 $(function() {
-	YodaPortal.groupManager.load(<?= json_encode($groupHierarchy) ?>);
+	YodaPortal.groupManager.load(<?php echo  json_encode($groupHierarchy) ?>);
 });
 </script>
 
@@ -26,24 +26,24 @@ $(function() {
 	ksort($groupHierarchy);
 	foreach ($groupHierarchy as $category => $subcategories) {
 ?>
-	<div class="list-group-item category" id="category-<?=$i?>" data-name="<?=$category?>">
-		<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?=$i?>" href="#category-<?=$i?>-ul">
+	<div class="list-group-item category" id="category-<?php echo $i?>" data-name="<?php echo $category?>">
+		<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?php echo $i?>" href="#category-<?php echo $i?>-ul">
 			<i class="glyphicon glyphicon-triangle-right triangle"></i>
-			<?=$category?>
+			<?php echo $category?>
 		</a>
-		<div class="list-group collapse category-ul" id="category-<?=$i?>-ul">
+		<div class="list-group collapse category-ul" id="category-<?php echo $i?>-ul">
 <?php
 		ksort($subcategories);
 		foreach ($subcategories as $subcategory => $groups) {
 ?>
-	<div class="list-group-item subcategory" data-name="<?=$subcategory?>"><div class="name"><?=$subcategory?></div>
+	<div class="list-group-item subcategory" data-name="<?php echo $subcategory?>"><div class="name"><?php echo $subcategory?></div>
 	<div class="list-group subcategory-ul">
 <?php
 			ksort($groups);
 			foreach ($groups as $group => $properties) {
 ?>
-				<a class="list-group-item group" id="group-<?=$k?>" data-name="<?=$group?>">
-					<?=$group?>
+				<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo $group?>">
+					<?php echo $group?>
 				</a>
 <?php
 				$k++;
@@ -81,7 +81,7 @@ $(function() {
 				<p class="placeholder-text">
 					Please select a group.
 				</p>
-				<form action="<?=base_url('group-manager/group-update')?>" method="POST" class="form-horizontal hidden" id="f-group-update">
+				<form action="<?php echo base_url('group-manager/group-update')?>" method="POST" class="form-horizontal hidden" id="f-group-update">
 					<div class="form-group">
 						<label class="col-sm-4 control-label" for="f-group-update-category">Category</label>
 						<div class="col-sm-8">
@@ -137,7 +137,7 @@ $(function() {
 					<span class="placeholder-text">
 						Click here to add a new user to this group
 					</span>
-					<form action="<?=base_url('group-manager/user-create')?>" method="POST" class="form-inline hidden" id="f-user-create">
+					<form action="<?php echo base_url('group-manager/user-create')?>" method="POST" class="form-inline hidden" id="f-user-create">
 						<input name="group_name" id="f-user-create-group" type="hidden" />
 						<div class="input-group" style="width: 100%;">
 							<input name="user_name" id="f-user-create-name" class="form-control input-sm selectify-user-name" type="hidden" required placeholder="Enter a username" data-group="#f-user-create-group" />
@@ -150,8 +150,8 @@ $(function() {
 			</div>
 			<div class="panel-footer clearfix" style="border-top: 1px solid #ddd;">
 				<div class="input-group-sm pull-left">
-					<a class="btn btn-sm btn-primary disabled update-button" data-action="<?=base_url('group-manager/user-update')?>" title="Change whether the selected user is a manager in this group">Change role</a>
-					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?=base_url('group-manager/user-delete')?>" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove</a>
+					<a class="btn btn-sm btn-primary disabled update-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Change whether the selected user is a manager in this group">Change role</a>
+					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/user-delete')?>" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove</a>
 				</div>
 			</div>
 		</div>
@@ -166,7 +166,7 @@ $(function() {
 				<h4 class="modal-title" id="myModalLabel">Create a group</h4>
 			</div>
 			<div class="modal-body">
-				<form class="form-horizontal" id="f-group-create" action="<?=base_url('group-manager/group-create')?>" method="POST">
+				<form class="form-horizontal" id="f-group-create" action="<?php echo base_url('group-manager/group-create')?>" method="POST">
 					<div class="form-group">
 						<label class="col-sm-4 control-label" for="f-group-create-category">Category</label>
 						<div class="col-sm-8">

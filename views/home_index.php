@@ -42,10 +42,10 @@
 	foreach ($YODA_MODULES as $module_name => $module) {
 ?>
 		<div class="col-xs-12 col-md-4">
-			<a href="<?=base_url($module_name)?>">
+			<a href="<?php echo base_url($module_name)?>">
 				<div class="well">
-					<span class="<?=$module['icon_class']?>" aria-hidden="true"></span>
-					<?=$module['label']?>
+					<span class="<?php echo $module['icon_class']?>" aria-hidden="true"></span>
+					<?php echo $module['label']?>
 				</div>
 			</a>
 		</div>
