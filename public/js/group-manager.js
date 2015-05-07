@@ -1015,10 +1015,11 @@ $(function() {
 			}
 
 			if (Object.keys(this.groups).length < this.CATEGORY_FOLD_THRESHOLD) {
-				// Unfold all categories if the user has access to less than
+				// Unfold all categories containing non-priv groups if the user has access to less than
 				// CATEGORY_FOLD_THRESHOLD groups.
 				for (groupName in this.groups)
-					this.unfoldToGroup(groupName);
+					if (!groupName.match(/^priv-/))
+						this.unfoldToGroup(groupName);
 			} else {
 				// When the user can only access a single category, unfold it automatically.
 				var $categoryEls = $('#group-list .category');
