@@ -607,8 +607,8 @@ $(function() {
 			var groupName = $(el).find('#f-user-create-group').val();
 			var  userName = $(el).find('#f-user-create-name' ).val();
 
-			if (!userName.match(/^([a-z-]+|[a-z_.-]+@([a-z_-]+|[a-z_-][a-z_.-]*[a-z_-]))$/)) {
-				alert('Please enter an e-mail address or a name consisting only of lowercase letters, numbers, and hyphens (-).');
+			if (!userName.match(/^([a-z]+|[a-z0-9_.-]+@[a-z0-9_.-]+)$/)) {
+				alert('Please enter either an e-mail address or a name consisting only of lowercase letters.');
 				return;
 			}
 
