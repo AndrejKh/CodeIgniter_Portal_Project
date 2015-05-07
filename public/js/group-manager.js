@@ -438,7 +438,7 @@ $(function() {
 				$el.select2({
 					allowClear:  true,
 					openOnEnter: false,
-					minimumInputLength: 4,
+					minimumInputLength: 3,
 					ajax: {
 						quietMillis: 400,
 						url:      YodaPortal.baseUrl + 'group-manager/get-users',
