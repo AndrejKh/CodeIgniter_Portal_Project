@@ -8,16 +8,16 @@ class Intake extends CI_Controller {
 		redirect(base_url() . '../portal-intake');
 		return;
 
-		$this->load->view('common-start', array(
-			 'styleIncludes' => array('intake.css'),
-			'scriptIncludes' => array('intake.js'),
-			'activeModule'   => 'intake',
-			'user' => array(
-				'username' => $this->rodsuser->getUsername(),
-			),
-		));
-		$this->load->view('intake_index');
-		$this->load->view('common-end');
+		//$this->load->view('common-start', array(
+		//	 'styleIncludes' => array('intake.css'),
+		//	'scriptIncludes' => array('intake.js'),
+		//	'activeModule'   => 'intake',
+		//	'user' => array(
+		//		'username' => $this->rodsuser->getUsername(),
+		//	),
+		//));
+		//$this->load->view('intake_index');
+		//$this->load->view('common-end');
 	}
 
 	public function __construct() {
@@ -35,7 +35,11 @@ class Intake extends CI_Controller {
 				$this->session->userdata('password')
 			);
 		}
-		if (!$this->rodsuser->isLoggedIn())
-			redirect('user/login');
+
+		// XXX: Do not require a login - we redirect to the separate intake portal
+		//      which handles its own session management.
+
+		//if (!$this->rodsuser->isLoggedIn())
+		//	redirect('user/login');
 	}
 }
