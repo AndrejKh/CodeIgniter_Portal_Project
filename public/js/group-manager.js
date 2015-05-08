@@ -510,6 +510,14 @@ $(function() {
 				$(el).attr('id') === 'f-group-create'
 				? 'create' : 'update';
 
+			$(el).find('input[type="submit"]')
+				.addClass('disabled')
+				.val(
+					action === 'create'
+					? 'Adding group...'
+					: 'Updating...'
+				);
+
 			var newProperties = {
 				name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
 							 + $(el).find('#f-group-'+action+'-name'     ).val(),
@@ -577,6 +585,15 @@ $(function() {
 					window.location.reload(true);
 				} else {
 					// Something went wrong.
+
+					$(el).find('input[type="submit"]')
+						.removeClass('disabled')
+						.val(
+							action === 'create'
+							? 'Add group'
+							: 'Update'
+						);
+
 					if ('message' in result)
 						alert(result.message);
 					else
@@ -603,6 +620,11 @@ $(function() {
 		 */
 		onSubmitUserCreate: function(el, e) {
 			e.preventDefault();
+
+			if ($(el).find('input[type="submit"]').hasClass('disabled'))
+				return;
+
+			$(el).find('input[type="submit"]').addClass('disabled').val('Adding...');
 
 			var groupName = $(el).find('#f-user-create-group').val();
 			var  userName = $(el).find('#f-user-create-name' ).val();
@@ -639,6 +661,9 @@ $(function() {
 					that.selectUser(userName);
 				} else {
 					// Something went wrong. :(
+
+					$(el).find('input[type="submit"]').addClass('disabled').val('Adding...');
+
 					if ('message' in result)
 						alert(result.message);
 					else
@@ -647,6 +672,8 @@ $(function() {
 							+ "Please contact a Yoda administrator"
 						);
 				}
+				$(el).find('input[type="submit"]').removeClass('disabled').val('Add');
+
 			}).fail(function() {
 				alert("Error: Could not add a user due to an internal error.\nPlease contact a Yoda administrator");
 			});
@@ -965,17 +992,6 @@ $(function() {
 
 			if (!YodaPortal.storage.session.get('confirm-user-delete', true))
 				this.removeUserDeleteConfirmationModal();
-
-			$('#f-user-create').on('keypress', '.select2-chosen', function(e) {
-				// NOTE: This requires a patched select2.js where a key event is
-				// not killEvent()ed when openOnEnter is false.
-
-				if (e.which === 13) {
-					// On 'Enter'.
-					$(this).submit();
-					e.stopPropagation();
-				}
-			});
 
 			// User list search.
 			$('#user-list-search').on('keyup', function() {
