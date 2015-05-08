@@ -737,7 +737,7 @@ $(function() {
 		 */
 		onClickUserDelete: function(el) {
 			if ($('#f-user-delete-no-confirm').prop('checked')) {
-				YodaPortal.storage.session.set('confirm-user-delete', true);
+				YodaPortal.storage.session.set('confirm-user-delete', false);
 				this.removeUserDeleteConfirmationModal();
 			}
 
@@ -963,7 +963,7 @@ $(function() {
 				$(this).find('.user').text(userName);
 			});
 
-			if (YodaPortal.storage.session.get('confirm-user-delete', false))
+			if (!YodaPortal.storage.session.get('confirm-user-delete', true))
 				this.removeUserDeleteConfirmationModal();
 
 			$('#f-user-create').on('keypress', '.select2-chosen', function(e) {
