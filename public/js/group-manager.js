@@ -684,7 +684,7 @@ $(function() {
 		 */
 		removeUserDeleteConfirmationModal: function() {
 			var that = this;
-			$('.users.panel .delete-button').on('click', function(e) {
+			$('.users.panel .delete-button').off('click').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 				that.onClickUserDelete(this);
@@ -764,6 +764,7 @@ $(function() {
 		 */
 		onClickUserDelete: function(el) {
 			if ($('#f-user-delete-no-confirm').prop('checked')) {
+				$('#f-user-delete-no-confirm').prop('checked', false);
 				YodaPortal.storage.session.set('confirm-user-delete', false);
 				this.removeUserDeleteConfirmationModal();
 			}
