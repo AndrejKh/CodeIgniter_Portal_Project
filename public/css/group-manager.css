@@ -113,6 +113,10 @@ i.form-control-feedback.glyphicon {
 	color: #aaa;
 }
 
+.item-user-create .user-create-text {
+	text-decoration: underline
+}
+
 .list-group-item.filtered {
 	display: none;
 }

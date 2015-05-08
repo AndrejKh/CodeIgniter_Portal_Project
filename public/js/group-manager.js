@@ -510,6 +510,14 @@ $(function() {
 				$(el).attr('id') === 'f-group-create'
 				? 'create' : 'update';
 
+			$(el).find('input[type="submit"]')
+				.addClass('disabled')
+				.val(
+					action === 'create'
+					? 'Adding group...'
+					: 'Updating...'
+				);
+
 			var newProperties = {
 				name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
 							 + $(el).find('#f-group-'+action+'-name'     ).val(),
@@ -577,6 +585,15 @@ $(function() {
 					window.location.reload(true);
 				} else {
 					// Something went wrong.
+
+					$(el).find('input[type="submit"]')
+						.removeClass('disabled')
+						.val(
+							action === 'create'
+							? 'Add group'
+							: 'Update'
+						);
+
 					if ('message' in result)
 						alert(result.message);
 					else
@@ -603,6 +620,11 @@ $(function() {
 		 */
 		onSubmitUserCreate: function(el, e) {
 			e.preventDefault();
+
+			if ($(el).find('input[type="submit"]').hasClass('disabled'))
+				return;
+
+			$(el).find('input[type="submit"]').addClass('disabled').val('Adding...');
 
 			var groupName = $(el).find('#f-user-create-group').val();
 			var  userName = $(el).find('#f-user-create-name' ).val();
@@ -632,13 +654,16 @@ $(function() {
 
 					$(el).find('#f-user-create-name').select2('val', '');
 					$(el).addClass('hidden');
-					$(el).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
+					$(el).parents('.list-group-item').find('.user-create-text').removeClass('hidden');
 
 					that.deselectGroup();
 					that.selectGroup(groupName);
 					that.selectUser(userName);
 				} else {
 					// Something went wrong. :(
+
+					$(el).find('input[type="submit"]').addClass('disabled').val('Adding...');
+
 					if ('message' in result)
 						alert(result.message);
 					else
@@ -647,6 +672,8 @@ $(function() {
 							+ "Please contact a Yoda administrator"
 						);
 				}
+				$(el).find('input[type="submit"]').removeClass('disabled').val('Add');
+
 			}).fail(function() {
 				alert("Error: Could not add a user due to an internal error.\nPlease contact a Yoda administrator");
 			});
@@ -737,7 +764,7 @@ $(function() {
 		 */
 		onClickUserDelete: function(el) {
 			if ($('#f-user-delete-no-confirm').prop('checked')) {
-				YodaPortal.storage.session.set('confirm-user-delete', true);
+				YodaPortal.storage.session.set('confirm-user-delete', false);
 				this.removeUserDeleteConfirmationModal();
 			}
 
@@ -924,10 +951,10 @@ $(function() {
 					that.selectUser($(this).attr('data-name'));
 			});
 
-			$userList.on('click', '.list-group-item:has(.placeholder-text:not(.hidden))', function() {
+			$userList.on('click', '.list-group-item:has(.user-create-text:not(.hidden))', function() {
 				// Show the user add form.
 				that.deselectUser();
-				$(this).find('.placeholder-text').addClass('hidden');
+				$(this).find('.user-create-text').addClass('hidden');
 				$(this).find('form').removeClass('hidden');
 				$(this).find('form').find('#f-user-create-name').select2('open');
 			});
@@ -936,7 +963,7 @@ $(function() {
 				// Remove the new user name input on unfocus if nothing was entered.
 				if ($(this).val().length === 0) {
 					$(this).parents('form').addClass('hidden');
-					$(this).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
+					$(this).parents('.list-group-item').find('.user-create-text').removeClass('hidden');
 				}
 			});
 
@@ -963,19 +990,8 @@ $(function() {
 				$(this).find('.user').text(userName);
 			});
 
-			if (YodaPortal.storage.session.get('confirm-user-delete', false))
+			if (!YodaPortal.storage.session.get('confirm-user-delete', true))
 				this.removeUserDeleteConfirmationModal();
-
-			$('#f-user-create').on('keypress', '.select2-chosen', function(e) {
-				// NOTE: This requires a patched select2.js where a key event is
-				// not killEvent()ed when openOnEnter is false.
-
-				if (e.which === 13) {
-					// On 'Enter'.
-					$(this).submit();
-					e.stopPropagation();
-				}
-			});
 
 			// User list search.
 			$('#user-list-search').on('keyup', function() {
