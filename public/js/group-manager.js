@@ -654,7 +654,7 @@ $(function() {
 
 					$(el).find('#f-user-create-name').select2('val', '');
 					$(el).addClass('hidden');
-					$(el).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
+					$(el).parents('.list-group-item').find('.user-create-text').removeClass('hidden');
 
 					that.deselectGroup();
 					that.selectGroup(groupName);
@@ -951,10 +951,10 @@ $(function() {
 					that.selectUser($(this).attr('data-name'));
 			});
 
-			$userList.on('click', '.list-group-item:has(.placeholder-text:not(.hidden))', function() {
+			$userList.on('click', '.list-group-item:has(.user-create-text:not(.hidden))', function() {
 				// Show the user add form.
 				that.deselectUser();
-				$(this).find('.placeholder-text').addClass('hidden');
+				$(this).find('.user-create-text').addClass('hidden');
 				$(this).find('form').removeClass('hidden');
 				$(this).find('form').find('#f-user-create-name').select2('open');
 			});
@@ -963,7 +963,7 @@ $(function() {
 				// Remove the new user name input on unfocus if nothing was entered.
 				if ($(this).val().length === 0) {
 					$(this).parents('form').addClass('hidden');
-					$(this).parents('.list-group-item').find('.placeholder-text').removeClass('hidden');
+					$(this).parents('.list-group-item').find('.user-create-text').removeClass('hidden');
 				}
 			});
 
