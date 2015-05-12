@@ -1,10 +1,10 @@
-YODA-PORTAL
-===========
+YODA-PORTAL-GROUP-MANAGER
+=========================
 
 NAME
 ----
 
-yoda-portal - A modular web platform for interfaces to Yoda
+yoda-portal-group-manager - Group manager module for the Yoda platform
 
 LICENSE
 -------
