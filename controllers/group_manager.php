@@ -1,6 +1,6 @@
 <?php
 
-class Group_Manager extends CI_Controller {
+class Group_Manager extends MY_Controller {
 
 	protected $_groups;        /// `[ group... ]`.
 	protected $_categories;    /// `[ category... ]`.
@@ -480,20 +480,5 @@ EORULE;
 
 	public function __construct() {
 		parent::__construct();
-		$this->load->library('prods');
-		$this->load->library('session');
-		$this->load->model('rodsuser');
-
-		if (
-			   $this->session->userdata('username') !== false
-			&& $this->session->userdata('password') !== false
-		) {
-			$this->rodsuser->getRodsAccount(
-				$this->session->userdata('username'),
-				$this->session->userdata('password')
-			);
-		}
-		if (!$this->rodsuser->isLoggedIn())
-			redirect('user/login');
 	}
 }

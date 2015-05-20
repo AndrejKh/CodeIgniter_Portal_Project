@@ -38,18 +38,18 @@
 |
 */
 
-$route['default_controller'] = "home";
-$route['404_override'] = '';
+$route['default_controller'] = 'group-manager';
 
-$route['group-manager']                   = "group_manager";
-$route['group-manager/get-categories']    = "group_manager/getCategories";
-$route['group-manager/get-subcategories'] = "group_manager/getSubcategories";
-$route['group-manager/get-users']         = "group_manager/getUsers";
-$route['group-manager/group-create']      = "group_manager/groupCreate";
-$route['group-manager/group-update']      = "group_manager/groupUpdate";
-$route['group-manager/user-create']       = "group_manager/userCreate";
-$route['group-manager/user-update']       = "group_manager/userUpdate";
-$route['group-manager/user-delete']       = "group_manager/userDelete";
+// NOTE: 'group-manager' in the route name is the module name.
+//       The controller name is omitted from the path.
+$route['group-manager/get-categories']    = "group-manager/group_manager/getCategories";
+$route['group-manager/get-subcategories'] = "group-manager/group_manager/getSubcategories";
+$route['group-manager/get-users']         = "group-manager/group_manager/getUsers";
+$route['group-manager/group-create']      = "group-manager/group_manager/groupCreate";
+$route['group-manager/group-update']      = "group-manager/group_manager/groupUpdate";
+$route['group-manager/user-create']       = "group-manager/group_manager/userCreate";
+$route['group-manager/user-update']       = "group-manager/group_manager/userUpdate";
+$route['group-manager/user-delete']       = "group-manager/group_manager/userDelete";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

@@ -858,6 +858,17 @@ $(function() {
 			var $groupList = $('#group-list');
 
 			// Attach event handlers {{{
+			// Generic {{{
+
+			$(document).ajaxSend(function(e, request, settings) {
+				// Append a CSRF token to all AJAX POST requests.
+				if (settings.type === 'POST' && settings.data.length)
+					settings.data
+						+= '&' + encodeURIComponent(YodaPortal.csrf.tokenName)
+						 + '=' + encodeURIComponent(YodaPortal.csrf.tokenValue);
+			});
+
+			// }}}
 			// Group list {{{
 
 			$groupList.on('show.bs.collapse', function(e) {
