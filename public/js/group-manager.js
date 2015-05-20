@@ -624,8 +624,6 @@ $(function() {
 			if ($(el).find('input[type="submit"]').hasClass('disabled'))
 				return;
 
-			$(el).find('input[type="submit"]').addClass('disabled').val('Adding...');
-
 			var groupName = $(el).find('#f-user-create-group').val();
 			var  userName = $(el).find('#f-user-create-name' ).val();
 
@@ -633,6 +631,8 @@ $(function() {
 				alert('Please enter either an e-mail address or a name consisting only of lowercase letters.');
 				return;
 			}
+
+			$(el).find('input[type="submit"]').addClass('disabled').val('Adding...');
 
 			var that = this;
 
@@ -661,9 +661,6 @@ $(function() {
 					that.selectUser(userName);
 				} else {
 					// Something went wrong. :(
-
-					$(el).find('input[type="submit"]').addClass('disabled').val('Adding...');
-
 					if ('message' in result)
 						alert(result.message);
 					else
