@@ -1,6 +1,6 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-// Yoda Portal Module Group Manager onfiguration {{{
+// Yoda Portal Module Group Manager configuration {{{
 
 // No module-specific config yet.
 $config = array();
