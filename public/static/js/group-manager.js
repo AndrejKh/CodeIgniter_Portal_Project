@@ -77,7 +77,7 @@ $(function() {
 		unfoldToGroup: function(groupName) {
 			var $groupList = $('#group-list');
 
-			var $group = $groupList.find('.group[data-name="' + groupName + '"]');
+			var $group = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
 			$group.parents('.category').children('a.name').removeClass('collapsed');
 			$group.parents('.category').children('.category-ul').removeClass('hidden');
 			$group.parents('.category').children('.category-ul').collapse('show');
@@ -92,7 +92,7 @@ $(function() {
 			var group = this.groups[groupName];
 
 			var $groupList = $('#group-list');
-			var $group     = $groupList.find('.group[data-name="' + groupName + '"]');
+			var $group     = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
 			var $oldGroup  = $groupList.find('.active');
 
 			if ($group.is($oldGroup))
@@ -201,7 +201,7 @@ $(function() {
 							: 'Regular user'
 						)
 						+ '"></i> '
-						+ userName
+						+ that.parent.escapeEntities(userName)
 					);
 
 					$userList.append($user);
@@ -263,7 +263,7 @@ $(function() {
 		selectUser: function(userName) {
 			var $userList = $('#user-list');
 
-			var $user    = $userList.find('.user[data-name="' + userName + '"]');
+			var $user    = $userList.find('.user[data-name="' + this.parent.escapeQuotes(userName) + '"]');
 			var $oldUser = $userList.find('.active');
 
 			if ($user.is($oldUser))
@@ -732,11 +732,11 @@ $(function() {
 					that.selectGroup(groupName);
 
 					// Give a visual hint that the user was updated.
-					$('#user-list .user[data-name="' + userName + '"]').addClass('blink-once');
+					$('#user-list .user[data-name="' + that.parent.escapeQuotes(userName) + '"]').addClass('blink-once');
 				} else {
 					// Something went wrong. :(
 
-					$('#user-list .user.update-pending[data-name="' + userName + '"]')
+					$('#user-list .user.update-pending[data-name="' + that.parent.escapeQuotes(userName) + '"]')
 						.removeClass('update-pending disabled')
 						.attr('title', '');
 
@@ -797,7 +797,7 @@ $(function() {
 					// Something went wrong. :(
 
 					// Re-enable user list entry.
-					$('#user-list .user.delete-pending[data-name="' + userName + '"]').removeClass('delete-pending disabled').attr('title', '');
+					$('#user-list .user.delete-pending[data-name="' + that.parent.escapeQuotes(userName) + '"]').removeClass('delete-pending disabled').attr('title', '');
 
 					if ('message' in result)
 						alert(result.message);
@@ -1028,7 +1028,7 @@ $(function() {
 			// Indicate which groups are managed by this user.
 			for (var groupName in this.groups) {
 				if (this.isManager(groupName, YodaPortal.user.username))
-					$('#group-list .group[data-name="' + groupName + '"]').append(
+					$('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
 						'<span class="pull-right glyphicon glyphicon-tower" title="You manage this group"></span>'
 					);
 			}

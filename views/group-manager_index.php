@@ -26,24 +26,24 @@ $(function() {
 	ksort($groupHierarchy);
 	foreach ($groupHierarchy as $category => $subcategories) {
 ?>
-	<div class="list-group-item category" id="category-<?php echo $i?>" data-name="<?php echo $category?>">
+	<div class="list-group-item category" id="category-<?php echo $i?>" data-name="<?php echo htmlentities($category); ?>">
 		<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?php echo $i?>" href="#category-<?php echo $i?>-ul">
 			<i class="glyphicon glyphicon-triangle-right triangle"></i>
-			<?php echo $category?>
+			<?php echo htmlentities($category); ?>
 		</a>
 		<div class="list-group collapse category-ul" id="category-<?php echo $i?>-ul">
 <?php
 		ksort($subcategories);
 		foreach ($subcategories as $subcategory => $groups) {
 ?>
-	<div class="list-group-item subcategory" data-name="<?php echo $subcategory?>"><div class="name"><?php echo $subcategory?></div>
+	<div class="list-group-item subcategory" data-name="<?php echo htmlentities($subcategory); ?>"><div class="name"><?php echo htmlentities($subcategory); ?></div>
 	<div class="list-group subcategory-ul">
 <?php
 			ksort($groups);
 			foreach ($groups as $group => $properties) {
 ?>
-				<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo $group?>">
-					<?php echo $group?>
+				<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo htmlentities($group); ?>">
+					<?php echo htmlentities($group); ?>
 				</a>
 <?php
 				$k++;
