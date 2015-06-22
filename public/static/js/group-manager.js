@@ -83,6 +83,16 @@ $(function() {
 			$group.parents('.category').children('.category-ul').collapse('show');
 		},
 
+		updateGroupMemberCount: function(groupName) {
+			var $userPanelTitle = $('.panel.users .panel-title');
+			$userPanelTitle.text(
+				$userPanelTitle.text().replace(
+					/(?:\s*\(\d+\))?$/,
+					' (' + Object.keys(this.groups[groupName].members).length + ')'
+				)
+			);
+		},
+
 		/**
 		 * \brief Select the given group in the group list.
 		 *
@@ -150,6 +160,8 @@ $(function() {
 
 			// }}}
 			// Build the user list panel {{{
+
+			that.updateGroupMemberCount(groupName);
 
 			(function(){
 				var users = that.groups[groupName].members;
@@ -244,6 +256,10 @@ $(function() {
 			$groupProperties.find('form').addClass('hidden');
 
 			var $userPanel = $('.panel.users');
+
+			var $panelTitle = $userPanel.find('.panel-title');
+			$panelTitle.text($panelTitle.text().replace(/\s*\(\d+\)$/, ''));
+
 			$userPanel.find('#user-list-search').val('');
 			$userPanel.find('.panel-body:has(.placeholder-text)').removeClass('hidden');
 			$userPanel.find('#user-list').addClass('hidden');
