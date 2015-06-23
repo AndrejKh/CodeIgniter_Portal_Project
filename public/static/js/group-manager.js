@@ -534,6 +534,16 @@ $(function() {
 					: 'Updating...'
 				);
 
+			function resetSubmitButton() {
+				$(el).find('input[type="submit"]')
+					.removeClass('disabled')
+					.val(
+						action === 'create'
+						? 'Add group'
+						: 'Update'
+					);
+			}
+
 			var newProperties = {
 				name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
 							 + $(el).find('#f-group-'+action+'-name'     ).val(),
@@ -544,16 +554,18 @@ $(function() {
 
 			if (newProperties.category === '' || newProperties.subcategory === '') {
 				alert('Please select a category and subcategory.');
+				resetSubmitButton();
 				return;
 			} else if (
 				// Validate input, in case HTML5 validation did not work.
 				// Also needed for the select2 inputs.
 				[newProperties.category, newProperties.subcategory, newProperties.description]
 					.some(function(item) {
-					return !item.match(/^[a-zA-Z0-9,.()_ -]*$/);
-				})
+						return !item.match(/^[a-zA-Z0-9,.()_ -]*$/);
+					})
 			) {
 				alert('The (sub)category name and group description fields may only contain letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).');
+				resetSubmitButton();
 				return;
 			}
 
@@ -602,13 +614,7 @@ $(function() {
 				} else {
 					// Something went wrong.
 
-					$(el).find('input[type="submit"]')
-						.removeClass('disabled')
-						.val(
-							action === 'create'
-							? 'Add group'
-							: 'Update'
-						);
+					resetSubmitButton();
 
 					if ('message' in result)
 						alert(result.message);
