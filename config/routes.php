@@ -47,6 +47,7 @@ $route['group-manager/get-subcategories'] = "group-manager/group_manager/getSubc
 $route['group-manager/get-users']         = "group-manager/group_manager/getUsers";
 $route['group-manager/group-create']      = "group-manager/group_manager/groupCreate";
 $route['group-manager/group-update']      = "group-manager/group_manager/groupUpdate";
+$route['group-manager/group-delete']      = "group-manager/group_manager/groupDelete";
 $route['group-manager/user-create']       = "group-manager/group_manager/userCreate";
 $route['group-manager/user-update']       = "group-manager/group_manager/userUpdate";
 $route['group-manager/user-delete']       = "group-manager/group_manager/userDelete";

@@ -100,6 +100,7 @@ $(function() {
 		 */
 		selectGroup: function(groupName) {
 			var group = this.groups[groupName];
+			var userIsManager = this.isManager(groupName, YodaPortal.user.username);
 
 			var $groupList = $('#group-list');
 			var $group     = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
@@ -118,6 +119,12 @@ $(function() {
 
 			var that = this;
 
+			var $groupPanel = $('.panel.groups');
+			$groupPanel.find('.delete-button').toggleClass(
+				'disabled',
+				!userIsManager || !groupName.match(/^grp-/)
+			);
+
 			// Build the group properties panel {{{
 
 			(function(){
@@ -125,8 +132,6 @@ $(function() {
 
 				$groupProperties.find('.placeholder-text').addClass('hidden');
 				$groupProperties.find('form').removeClass('hidden');
-
-				var userIsManager = that.isManager(groupName, YodaPortal.user.username);
 
 				$groupProperties.find('#f-group-update-category')
 					.select2('data', { id: group.category, text: group.category })
@@ -247,6 +252,9 @@ $(function() {
 		 */
 		deselectGroup: function() {
 			this.deselectUser();
+
+			var $groupPanel = $('.panel.groups');
+			$groupPanel.find('.delete-button').addClass('disabled');
 
 			var $groupList = $('#group-list');
 			$groupList.find('.active').removeClass('active');
@@ -630,6 +638,61 @@ $(function() {
 		},
 
 		/**
+		 * \brief Handle a group delete button click event.
+		 */
+		onClickGroupDelete: function(el) {
+			var groupName = $('#group-list .group.active').attr('data-name');
+
+			$('#group-list .group.active')
+				.addClass('delete-pending disabled')
+				.attr('title', 'Removal pending');
+			this.deselectGroup();
+
+			var that = this;
+
+			$.ajax({
+				url:      $(el).attr('data-action'),
+				type:     'post',
+				dataType: 'json',
+				data: {
+					group_name: groupName,
+				},
+			}).done(function(result) {
+				if ('status' in result)
+					console.log('Group remove completed with status ' + result.status);
+				if ('status' in result && result.status === 0) {
+					// Give the user some feedback.
+					YodaPortal.storage.session.set('messages',
+						YodaPortal.storage.session.get('messages', []).concat({
+							type:    'success',
+							message: 'Removed group ' + groupName + '.'
+						})
+					);
+
+					$(window).on('beforeunload', function() {
+						$(window).scrollTop(0);
+					});
+					window.location.reload(true);
+				} else {
+					// Something went wrong.
+
+					// Re-enable group list entry.
+					$('#group-list .group.delete-pending[data-name="' + that.parent.escapeQuotes(groupName) + '"]').removeClass('delete-pending disabled').attr('title', '');
+
+					if ('message' in result)
+						alert(result.message);
+					else
+						alert(
+							  "Error: Could not remove the selected group due to an internal error.\n"
+							+ "Please contact a Yoda administrator"
+						);
+				}
+			}).fail(function() {
+				alert("Error: Could not remove the selected group due to an internal error.\nPlease contact a Yoda administrator");
+			});
+		},
+
+		/**
 		 * \brief User add form submission handler.
 		 *
 		 * Adds a user to the selected group.
@@ -968,6 +1031,17 @@ $(function() {
 			// Group creation / update.
 			$('#f-group-create, #f-group-update').on('submit', function(e) {
 				that.onSubmitGroupCreateOrUpdate(this, e);
+			});
+
+			// Group removal.
+			$('#modal-group-delete .confirm').on('click', function(e) {
+				that.onClickGroupDelete($('.groups.panel .delete-button')[0]);
+				$('#modal-group-delete').modal('hide');
+			});
+
+			$('#modal-group-delete').on('show.bs.modal', function() {
+				var groupName = $('#group-list .group.active').attr('data-name');
+				$(this).find('.group').text(groupName);
 			});
 
 			// }}}

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * \brief Group_Manager controller.
+ *
+ * A light wrapper for UU group management rules.
+ */
 class Group_Manager extends MY_Controller {
 
 	protected $_groups;        /// `[ group... ]`.
@@ -363,6 +368,34 @@ EORULE;
 				'*status'  => 0,
 				'*message' => '',
 			);
+
+		$this->output
+			->set_content_type('application/json')
+			->set_output(json_encode(array(
+				'status'  => (int)$result['*status'],
+				'message' =>      $result['*message'],
+			)));
+	}
+
+	public function groupDelete() {
+		$ruleBody = <<<EORULE
+rule {
+	uuGroupRemove(*groupName, *statusInt, *message);
+	*status = str(*statusInt);
+}
+EORULE;
+		$rule = new ProdsRule(
+			$this->rodsuser->getRodsAccount(),
+			$ruleBody,
+			array(
+				'*groupName' => $this->input->post('group_name'),
+			),
+			array(
+				'*status',
+				'*message',
+			)
+		);
+		$result = $rule->execute();
 
 		$this->output
 			->set_content_type('application/json')
