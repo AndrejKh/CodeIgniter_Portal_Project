@@ -1013,11 +1013,17 @@ $(function() {
 				$('#f-group-create-name')       .val('').attr('data-prefix', 'grp-');
 				$('#f-group-create-description').val('');
 				var $selectedGroup = $('#group-list .group.active');
-				if ($selectedGroup.length) {
-					var groupName = $($selectedGroup[0]).attr('data-name');
+				var  selectedGroupName;
+				if (
+					$selectedGroup.length
+					&& that.isManagerInCategory(
+						that.groups[(selectedGroupName = $($selectedGroup[0]).attr('data-name'))].category,
+						YodaPortal.user.username
+					)
+				) {
 					// Fill in the (sub)category of the currently selected group.
-					$('#f-group-create-category')   .select2('val', that.groups[groupName].category);
-					$('#f-group-create-subcategory').select2('val', that.groups[groupName].subcategory);
+					$('#f-group-create-category')   .select2('val', that.groups[selectedGroupName].category);
+					$('#f-group-create-subcategory').select2('val', that.groups[selectedGroupName].subcategory);
 				} else {
 					$('#f-group-create-category')   .select2('val', '');
 					$('#f-group-create-subcategory').select2('val', '');
