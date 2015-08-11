@@ -77,10 +77,20 @@ $(function() {
 		unfoldToGroup: function(groupName) {
 			var $groupList = $('#group-list');
 
-			var $group = $groupList.find('.group[data-name="' + groupName + '"]');
+			var $group = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
 			$group.parents('.category').children('a.name').removeClass('collapsed');
 			$group.parents('.category').children('.category-ul').removeClass('hidden');
 			$group.parents('.category').children('.category-ul').collapse('show');
+		},
+
+		updateGroupMemberCount: function(groupName) {
+			var $userPanelTitle = $('.panel.users .panel-title');
+			$userPanelTitle.text(
+				$userPanelTitle.text().replace(
+					/(?:\s*\(\d+\))?$/,
+					' (' + Object.keys(this.groups[groupName].members).length + ')'
+				)
+			);
 		},
 
 		/**
@@ -90,9 +100,10 @@ $(function() {
 		 */
 		selectGroup: function(groupName) {
 			var group = this.groups[groupName];
+			var userIsManager = this.isManager(groupName, YodaPortal.user.username);
 
 			var $groupList = $('#group-list');
-			var $group     = $groupList.find('.group[data-name="' + groupName + '"]');
+			var $group     = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
 			var $oldGroup  = $groupList.find('.active');
 
 			if ($group.is($oldGroup))
@@ -108,6 +119,12 @@ $(function() {
 
 			var that = this;
 
+			var $groupPanel = $('.panel.groups');
+			$groupPanel.find('.delete-button').toggleClass(
+				'disabled',
+				!userIsManager || !groupName.match(/^grp-/)
+			);
+
 			// Build the group properties panel {{{
 
 			(function(){
@@ -115,8 +132,6 @@ $(function() {
 
 				$groupProperties.find('.placeholder-text').addClass('hidden');
 				$groupProperties.find('form').removeClass('hidden');
-
-				var userIsManager = that.isManager(groupName, YodaPortal.user.username);
 
 				$groupProperties.find('#f-group-update-category')
 					.select2('data', { id: group.category, text: group.category })
@@ -150,6 +165,8 @@ $(function() {
 
 			// }}}
 			// Build the user list panel {{{
+
+			that.updateGroupMemberCount(groupName);
 
 			(function(){
 				var users = that.groups[groupName].members;
@@ -201,7 +218,7 @@ $(function() {
 							: 'Regular user'
 						)
 						+ '"></i> '
-						+ userName
+						+ that.parent.escapeEntities(userName)
 					);
 
 					$userList.append($user);
@@ -236,6 +253,9 @@ $(function() {
 		deselectGroup: function() {
 			this.deselectUser();
 
+			var $groupPanel = $('.panel.groups');
+			$groupPanel.find('.delete-button').addClass('disabled');
+
 			var $groupList = $('#group-list');
 			$groupList.find('.active').removeClass('active');
 
@@ -244,6 +264,10 @@ $(function() {
 			$groupProperties.find('form').addClass('hidden');
 
 			var $userPanel = $('.panel.users');
+
+			var $panelTitle = $userPanel.find('.panel-title');
+			$panelTitle.text($panelTitle.text().replace(/\s*\(\d+\)$/, ''));
+
 			$userPanel.find('#user-list-search').val('');
 			$userPanel.find('.panel-body:has(.placeholder-text)').removeClass('hidden');
 			$userPanel.find('#user-list').addClass('hidden');
@@ -263,7 +287,7 @@ $(function() {
 		selectUser: function(userName) {
 			var $userList = $('#user-list');
 
-			var $user    = $userList.find('.user[data-name="' + userName + '"]');
+			var $user    = $userList.find('.user[data-name="' + this.parent.escapeQuotes(userName) + '"]');
 			var $oldUser = $userList.find('.active');
 
 			if ($user.is($oldUser))
@@ -518,6 +542,16 @@ $(function() {
 					: 'Updating...'
 				);
 
+			function resetSubmitButton() {
+				$(el).find('input[type="submit"]')
+					.removeClass('disabled')
+					.val(
+						action === 'create'
+						? 'Add group'
+						: 'Update'
+					);
+			}
+
 			var newProperties = {
 				name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
 							 + $(el).find('#f-group-'+action+'-name'     ).val(),
@@ -528,16 +562,18 @@ $(function() {
 
 			if (newProperties.category === '' || newProperties.subcategory === '') {
 				alert('Please select a category and subcategory.');
+				resetSubmitButton();
 				return;
 			} else if (
 				// Validate input, in case HTML5 validation did not work.
 				// Also needed for the select2 inputs.
 				[newProperties.category, newProperties.subcategory, newProperties.description]
 					.some(function(item) {
-					return !item.match(/^[a-zA-Z0-9,.()_ -]*$/);
-				})
+						return !item.match(/^[a-zA-Z0-9,.()_ -]*$/);
+					})
 			) {
 				alert('The (sub)category name and group description fields may only contain letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).');
+				resetSubmitButton();
 				return;
 			}
 
@@ -586,13 +622,7 @@ $(function() {
 				} else {
 					// Something went wrong.
 
-					$(el).find('input[type="submit"]')
-						.removeClass('disabled')
-						.val(
-							action === 'create'
-							? 'Add group'
-							: 'Update'
-						);
+					resetSubmitButton();
 
 					if ('message' in result)
 						alert(result.message);
@@ -604,6 +634,61 @@ $(function() {
 				}
 			}).fail(function() {
 				alert("Error: Could not create group due to an internal error.\nPlease contact a Yoda administrator");
+			});
+		},
+
+		/**
+		 * \brief Handle a group delete button click event.
+		 */
+		onClickGroupDelete: function(el) {
+			var groupName = $('#group-list .group.active').attr('data-name');
+
+			$('#group-list .group.active')
+				.addClass('delete-pending disabled')
+				.attr('title', 'Removal pending');
+			this.deselectGroup();
+
+			var that = this;
+
+			$.ajax({
+				url:      $(el).attr('data-action'),
+				type:     'post',
+				dataType: 'json',
+				data: {
+					group_name: groupName,
+				},
+			}).done(function(result) {
+				if ('status' in result)
+					console.log('Group remove completed with status ' + result.status);
+				if ('status' in result && result.status === 0) {
+					// Give the user some feedback.
+					YodaPortal.storage.session.set('messages',
+						YodaPortal.storage.session.get('messages', []).concat({
+							type:    'success',
+							message: 'Removed group ' + groupName + '.'
+						})
+					);
+
+					$(window).on('beforeunload', function() {
+						$(window).scrollTop(0);
+					});
+					window.location.reload(true);
+				} else {
+					// Something went wrong.
+
+					// Re-enable group list entry.
+					$('#group-list .group.delete-pending[data-name="' + that.parent.escapeQuotes(groupName) + '"]').removeClass('delete-pending disabled').attr('title', '');
+
+					if ('message' in result)
+						alert(result.message);
+					else
+						alert(
+							  "Error: Could not remove the selected group due to an internal error.\n"
+							+ "Please contact a Yoda administrator"
+						);
+				}
+			}).fail(function() {
+				alert("Error: Could not remove the selected group due to an internal error.\nPlease contact a Yoda administrator");
 			});
 		},
 
@@ -732,11 +817,11 @@ $(function() {
 					that.selectGroup(groupName);
 
 					// Give a visual hint that the user was updated.
-					$('#user-list .user[data-name="' + userName + '"]').addClass('blink-once');
+					$('#user-list .user[data-name="' + that.parent.escapeQuotes(userName) + '"]').addClass('blink-once');
 				} else {
 					// Something went wrong. :(
 
-					$('#user-list .user.update-pending[data-name="' + userName + '"]')
+					$('#user-list .user.update-pending[data-name="' + that.parent.escapeQuotes(userName) + '"]')
 						.removeClass('update-pending disabled')
 						.attr('title', '');
 
@@ -797,7 +882,7 @@ $(function() {
 					// Something went wrong. :(
 
 					// Re-enable user list entry.
-					$('#user-list .user.delete-pending[data-name="' + userName + '"]').removeClass('delete-pending disabled').attr('title', '');
+					$('#user-list .user.delete-pending[data-name="' + that.parent.escapeQuotes(userName) + '"]').removeClass('delete-pending disabled').attr('title', '');
 
 					if ('message' in result)
 						alert(result.message);
@@ -928,11 +1013,17 @@ $(function() {
 				$('#f-group-create-name')       .val('').attr('data-prefix', 'grp-');
 				$('#f-group-create-description').val('');
 				var $selectedGroup = $('#group-list .group.active');
-				if ($selectedGroup.length) {
-					var groupName = $($selectedGroup[0]).attr('data-name');
+				var  selectedGroupName;
+				if (
+					$selectedGroup.length
+					&& that.isManagerInCategory(
+						that.groups[(selectedGroupName = $($selectedGroup[0]).attr('data-name'))].category,
+						YodaPortal.user.username
+					)
+				) {
 					// Fill in the (sub)category of the currently selected group.
-					$('#f-group-create-category')   .select2('val', that.groups[groupName].category);
-					$('#f-group-create-subcategory').select2('val', that.groups[groupName].subcategory);
+					$('#f-group-create-category')   .select2('val', that.groups[selectedGroupName].category);
+					$('#f-group-create-subcategory').select2('val', that.groups[selectedGroupName].subcategory);
 				} else {
 					$('#f-group-create-category')   .select2('val', '');
 					$('#f-group-create-subcategory').select2('val', '');
@@ -946,6 +1037,17 @@ $(function() {
 			// Group creation / update.
 			$('#f-group-create, #f-group-update').on('submit', function(e) {
 				that.onSubmitGroupCreateOrUpdate(this, e);
+			});
+
+			// Group removal.
+			$('#modal-group-delete .confirm').on('click', function(e) {
+				that.onClickGroupDelete($('.groups.panel .delete-button')[0]);
+				$('#modal-group-delete').modal('hide');
+			});
+
+			$('#modal-group-delete').on('show.bs.modal', function() {
+				var groupName = $('#group-list .group.active').attr('data-name');
+				$(this).find('.group').text(groupName);
 			});
 
 			// }}}
@@ -1028,7 +1130,7 @@ $(function() {
 			// Indicate which groups are managed by this user.
 			for (var groupName in this.groups) {
 				if (this.isManager(groupName, YodaPortal.user.username))
-					$('#group-list .group[data-name="' + groupName + '"]').append(
+					$('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
 						'<span class="pull-right glyphicon glyphicon-tower" title="You manage this group"></span>'
 					);
 			}

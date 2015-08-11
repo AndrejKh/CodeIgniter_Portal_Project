@@ -26,24 +26,24 @@ $(function() {
 	ksort($groupHierarchy);
 	foreach ($groupHierarchy as $category => $subcategories) {
 ?>
-	<div class="list-group-item category" id="category-<?php echo $i?>" data-name="<?php echo $category?>">
+	<div class="list-group-item category" id="category-<?php echo $i?>" data-name="<?php echo htmlentities($category); ?>">
 		<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?php echo $i?>" href="#category-<?php echo $i?>-ul">
 			<i class="glyphicon glyphicon-triangle-right triangle"></i>
-			<?php echo $category?>
+			<?php echo htmlentities($category); ?>
 		</a>
 		<div class="list-group collapse category-ul" id="category-<?php echo $i?>-ul">
 <?php
 		ksort($subcategories);
 		foreach ($subcategories as $subcategory => $groups) {
 ?>
-	<div class="list-group-item subcategory" data-name="<?php echo $subcategory?>"><div class="name"><?php echo $subcategory?></div>
+	<div class="list-group-item subcategory" data-name="<?php echo htmlentities($subcategory); ?>"><div class="name"><?php echo htmlentities($subcategory); ?></div>
 	<div class="list-group subcategory-ul">
 <?php
 			ksort($groups);
 			foreach ($groups as $group => $properties) {
 ?>
-				<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo $group?>">
-					<?php echo $group?>
+				<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo htmlentities($group); ?>">
+					<?php echo htmlentities($group); ?>
 				</a>
 <?php
 				$k++;
@@ -64,7 +64,7 @@ $(function() {
 			</div>
 			<div class="panel-footer clearfix">
 				<div class="input-group-sm pull-left">
-					<a class="btn btn-sm btn-danger disabled delete-button hidden">Remove group</a>
+					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/group-delete')?>" data-toggle="modal" data-target="#modal-group-delete">Remove group</a>
 				</div>
 				<div class="input-group-sm pull-right">
 					<a class="btn btn-sm btn-primary create-button disabled" data-toggle="modal" data-target="#modal-group-create">Add group</a>
@@ -151,7 +151,7 @@ $(function() {
 			<div class="panel-footer clearfix" style="border-top: 1px solid #ddd;">
 				<div class="input-group-sm pull-left">
 					<a class="btn btn-sm btn-primary disabled update-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Change whether the selected user is a manager in this group">Change role</a>
-					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/user-delete')?>" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove</a>
+					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/user-delete')?>" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove user</a>
 				</div>
 			</div>
 		</div>
@@ -163,7 +163,7 @@ $(function() {
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-				<h4 class="modal-title" id="myModalLabel">Create a group</h4>
+				<h4 class="modal-title">Create a group</h4>
 			</div>
 			<div class="modal-body">
 				<form class="form-horizontal" id="f-group-create" action="<?php echo base_url('group-manager/group-create')?>" method="POST">
@@ -208,12 +208,34 @@ $(function() {
 		</div>
 	</div>
 </div>
+<div class="modal fade" id="modal-group-delete" tabindex="-1" role="dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+				<h4 class="modal-title">Confirm group removal</h4>
+			</div>
+			<div class="modal-body">
+				<p>
+					Are you sure you want to remove <strong class="group"></strong>?
+				</p>
+				<p>
+					Please make sure that the group's directory is empty before continuing.
+				</p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-danger confirm">Remove</button>
+				<button class="btn btn-default" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
 <div class="modal fade" id="modal-user-delete" tabindex="-1" role="dialog">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-				<h4 class="modal-title" id="myModalLabel">Confirm user removal</h4>
+				<h4 class="modal-title">Confirm user removal</h4>
 			</div>
 			<div class="modal-body">
 				<p>
