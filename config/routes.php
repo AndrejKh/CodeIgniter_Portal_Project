@@ -40,6 +40,8 @@
 
 $route['default_controller'] = 'group-manager';
 
+$route['group-manager'] 				= "group-manager/group_manager";
+
 // NOTE: 'group-manager' in the route name is the module name.
 //       The controller name is omitted from the path.
 $route['group-manager/get-categories']    = "group-manager/group_manager/getCategories";
