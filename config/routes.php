@@ -38,21 +38,22 @@
 |
 */
 
-$route['default_controller'] = 'group-manager';
+$route['default_controller'] = $module;
 
-$route['group-manager'] 				= "group-manager/group_manager";
+$route[$module] 				= $module . "/group_manager";
+
 
 // NOTE: 'group-manager' in the route name is the module name.
 //       The controller name is omitted from the path.
-$route['group-manager/get-categories']    = "group-manager/group_manager/getCategories";
-$route['group-manager/get-subcategories'] = "group-manager/group_manager/getSubcategories";
-$route['group-manager/get-users']         = "group-manager/group_manager/getUsers";
-$route['group-manager/group-create']      = "group-manager/group_manager/groupCreate";
-$route['group-manager/group-update']      = "group-manager/group_manager/groupUpdate";
-$route['group-manager/group-delete']      = "group-manager/group_manager/groupDelete";
-$route['group-manager/user-create']       = "group-manager/group_manager/userCreate";
-$route['group-manager/user-update']       = "group-manager/group_manager/userUpdate";
-$route['group-manager/user-delete']       = "group-manager/group_manager/userDelete";
+$route[$module . '/get-categories']    = $module . "/group_manager/getCategories";
+$route[$module . '/get-subcategories'] = $module . "/group_manager/getSubcategories";
+$route[$module . '/get-users']         = $module . "/group_manager/getUsers";
+$route[$module . '/group-create']      = $module . "/group_manager/groupCreate";
+$route[$module . '/group-update']      = $module . "/group_manager/groupUpdate";
+$route[$module . '/group-delete']      = $module . "/group_manager/groupDelete";
+$route[$module . '/user-create']       = $module . "/group_manager/userCreate";
+$route[$module . '/user-update']       = $module . "/group_manager/userUpdate";
+$route[$module . '/user-delete']       = $module . "/group_manager/userDelete";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
