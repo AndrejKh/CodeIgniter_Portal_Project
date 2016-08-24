@@ -20,6 +20,8 @@ $(function() {
 		groupHierarchy: null, ///< A group hierarchy object. See YodaPortal.groupManager.load().
 		groups:         null, ///< A list of group objects with member information. See YodaPortal.groupManager.load().
 
+		isRodsAdmin: false,
+
 		/**
 		 * \brief Check if a user is a member of the given group.
 		 *
@@ -44,6 +46,10 @@ $(function() {
 			return this.isMember(groupName, userName) && this.groups[groupName].members[userName].isManager;
 		},
 
+		canUserManage: function(groupName) {
+			return this.isRodsAdmin || this.isManager(groupName, YodaPortal.user.username);
+		},
+
 		/**
 		 * \brief Try to check if a user is a manager in the given category.
 		 *
@@ -55,6 +61,9 @@ $(function() {
 		 * \return
 		 */
 		isManagerInCategory: function(categoryName, userName) {
+			if (this.isRodsAdmin)
+				return true;
+
 			var that = this;
 			try {
 				var category = this.groupHierarchy[categoryName];
@@ -100,7 +109,7 @@ $(function() {
 		 */
 		selectGroup: function(groupName) {
 			var group = this.groups[groupName];
-			var userIsManager = this.isManager(groupName, YodaPortal.user.username);
+			var userCanManage = this.canUserManage(groupName);
 
 			var $groupList = $('#group-list');
 			var $group     = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
@@ -122,7 +131,7 @@ $(function() {
 			var $groupPanel = $('.panel.groups');
 			$groupPanel.find('.delete-button').toggleClass(
 				'disabled',
-				!userIsManager || !groupName.match(/^grp-/)
+				!userCanManage || !groupName.match(/^grp-/)
 			);
 
 			// Build the group properties panel {{{
@@ -135,10 +144,10 @@ $(function() {
 
 				$groupProperties.find('#f-group-update-category')
 					.select2('data', { id: group.category, text: group.category })
-					.select2('readonly', !userIsManager);
+					.select2('readonly', !userCanManage);
 				$groupProperties.find('#f-group-update-subcategory')
 					.select2('data', { id: group.subcategory, text: group.subcategory })
-					.select2('readonly', !userIsManager);
+					.select2('readonly', !userCanManage);
 				$groupProperties.find('#f-group-update-name').siblings('.input-group-addon')
 					.html(function() {
 						var matches = groupName.match(/^(grp-|priv-)/, '');
@@ -158,9 +167,9 @@ $(function() {
 					});
 				$groupProperties.find('#f-group-update-description')
 					.val(group.description)
-					.prop('readonly', !userIsManager);
+					.prop('readonly', !userCanManage);
 				$groupProperties.find('#f-group-update-submit')
-					.toggleClass('hidden', !userIsManager);
+					.toggleClass('hidden', !userCanManage);
 			})();
 
 			// }}}
@@ -199,10 +208,12 @@ $(function() {
 					$user.attr('id', 'user-' + i);
 					$user.addClass(user.isManager ? 'manager' : 'regular');
 					$user.attr('data-name', userName);
-					if (userName === YodaPortal.user.username)
-						$user.addClass('disabled')
-							 .addClass('self')
-							 .attr('title', 'You cannot change your own role or remove yourself from this group.');
+					if (userName === YodaPortal.user.username) {
+						$user.addClass('self');
+						if (!that.isRodsAdmin)
+							$user.addClass('disabled')
+								 .attr('title', 'You cannot change your own role or remove yourself from this group.');
+					}
 
 					$user.html(
 						'<i class="glyphicon'
@@ -227,7 +238,7 @@ $(function() {
 				// Move the user creation item to the bottom of the list.
 				var $userCreateItem = $userList.find('.item-user-create');
 				$userCreateItem.appendTo($userList);
-				$userCreateItem.toggleClass('hidden', !that.isManager(groupName, YodaPortal.user.username));
+				$userCreateItem.toggleClass('hidden', !that.canUserManage(groupName));
 
 				$userList.find('#f-user-create-group').val(groupName);
 
@@ -298,7 +309,7 @@ $(function() {
 			$userList.find('.active').removeClass('active');
 			$user.addClass('active');
 
-			if (this.isManager($('#group-list .active.group').attr('data-name'), YodaPortal.user.username)) {
+			if (this.canUserManage($('#group-list .active.group').attr('data-name'))) {
 				var $userPanel = $('.panel.users');
 				$userPanel.find('.update-button, .delete-button').removeClass('disabled');
 			}
@@ -326,7 +337,7 @@ $(function() {
 
 				$el.attr(
 					'placeholder',
-					that.isMember('priv-category-add', YodaPortal.user.username)
+					(that.isMember('priv-category-add', YodaPortal.user.username) || that.isRodsAdmin)
 						? 'Select one or enter a new name'
 						: 'Select a category'
 				);
@@ -366,7 +377,7 @@ $(function() {
 							if (
 								  !inputMatches
 								&& query.length
-								&& that.isMember('priv-category-add', YodaPortal.user.username)
+								&& (that.isMember('priv-category-add', YodaPortal.user.username) || that.isRodsAdmin)
 							) {
 								results.push({
 									id:     query,
@@ -554,7 +565,7 @@ $(function() {
 
 			var newProperties = {
 				name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
-							 + $(el).find('#f-group-'+action+'-name'     ).val(),
+				             + $(el).find('#f-group-'+action+'-name'     ).val(),
 				description: $(el).find('#f-group-'+action+'-description').val(),
 				category:    $(el).find('#f-group-'+action+'-category'   ).val(),
 				subcategory: $(el).find('#f-group-'+action+'-subcategory').val(),
@@ -921,8 +932,9 @@ $(function() {
 		 *
 		 * \todo Generate the group list in JS just like the user list.
 		 */
-		load: function(groupHierarchy) {
+		load: function(groupHierarchy, userType) {
 			this.groupHierarchy = groupHierarchy;
+			this.isRodsAdmin = userType == 'rodsadmin';
 			this.groups = (function(hier) {
 				// Create a flat group map based on the hierarchy object.
 				var groups = { };
@@ -1122,17 +1134,22 @@ $(function() {
 
 			this.selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
 
-			if (this.isMember('priv-group-add', YodaPortal.user.username)) {
+			if (this.isMember('priv-group-add', YodaPortal.user.username) || this.isRodsAdmin) {
 				var $groupPanel = $('.panel.groups');
 				$groupPanel.find('.create-button').removeClass('disabled');
 			}
 
 			// Indicate which groups are managed by this user.
 			for (var groupName in this.groups) {
-				if (this.isManager(groupName, YodaPortal.user.username))
+				if (this.isManager(groupName, YodaPortal.user.username)) {
 					$('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
 						'<span class="pull-right glyphicon glyphicon-tower" title="You manage this group"></span>'
 					);
+				} else if (!this.isMember(groupName, YodaPortal.user.username) && this.isRodsAdmin) {
+					$('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
+						'<span class="pull-right glyphicon glyphicon-wrench" title="You are not a member of this group, but you can manage it as an iRODS administrator."></span>'
+					);
+				}
 			}
 
 			var selectedGroup = YodaPortal.storage.session.get('selected-group');
