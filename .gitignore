@@ -1,4 +1,5 @@
 /config/config_local.php
+/config/module_local.php
 *~*
 *.swp
 *.swo
