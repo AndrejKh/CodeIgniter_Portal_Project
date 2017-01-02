@@ -96,7 +96,7 @@ i.form-control-feedback.glyphicon {
 	padding-right: 8px;
 }
 
-#user-list .self {
+#user-list .disabled.self {
 	cursor: default;
 }
 

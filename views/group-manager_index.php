@@ -1,6 +1,6 @@
 <script>
 $(function() {
-	YodaPortal.groupManager.load(<?php echo json_encode($groupHierarchy); ?>);
+	YodaPortal.groupManager.load(<?php echo json_encode($groupHierarchy); ?>, <?php echo json_encode($userType) ?>);
 });
 </script>
 
