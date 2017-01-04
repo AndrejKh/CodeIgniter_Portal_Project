@@ -1198,7 +1198,12 @@ $(function() {
                     $('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
                         '<span class="pull-right glyphicon glyphicon-wrench" title="You are not a member of this group, but you can manage it as an iRODS administrator."></span>'
                     );
+                } else if (this.groups[groupName].members[this.userNameFull].access == 'reader') {
+                    $('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
+                        '<span class="pull-right glyphicon glyphicon-eye-open" title="You have read access to this group"></span>'
+                    );
                 }
+                console.log(this.groups[groupName]);
             }
 
             var selectedGroup = YodaPortal.storage.session.get('selected-group');

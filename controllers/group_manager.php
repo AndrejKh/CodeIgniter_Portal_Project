@@ -37,7 +37,7 @@ EORULE;
 			} else {
 				$ruleBody = <<<EORULE
 rule {
-	uuGroupMemberships(*user, *groupList);
+	uuUserGetGroups(*user, true, *groupList);
 	uuJoin(',', *groupList, *groups);
 }
 EORULE;
