@@ -152,7 +152,10 @@ $(function() {
 			</div>
 			<div class="panel-footer clearfix" style="border-top: 1px solid #ddd;">
 				<div class="input-group-sm pull-left">
-					<a class="btn btn-sm btn-primary disabled update-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Change whether the selected user is a manager in this group">Change role</a>
+					Change role:
+                    <a class="btn btn-sm btn-primary disabled update-button promote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Promote the selected user">&uarr;<i class="glyphicon glyphicon-tower"></i></a>
+                    <a class="btn btn-sm btn-primary disabled update-button demote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Demote the selected user">&darr;<i class="glyphicon glyphicon-eye-open"></i></a>
+
 					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/user-delete')?>" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove user</a>
 				</div>
 			</div>
@@ -186,8 +189,14 @@ $(function() {
 						<label class="col-sm-4 control-label" for="f-group-create-name">Group name</label>
 						<div class="col-sm-8">
 							<div class="input-group">
-								<div class="input-group-addon">
-									grp-
+
+								<div class="input-group-btn" id="f-group-create-prefix-div" title="Choose a group type">
+									<button type="button" id="f-group-create-prefix-button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="text">research-&nbsp;</span><span class="caret"></span></button>
+									<ul class="dropdown-menu">
+										<li><a href="#" data-value="grp-">grp-&nbsp;</a></li>
+										<li><a href="#" data-value="research-">research-&nbsp;</a></li>
+										<li><a href="#" data-value="intake-">intake-&nbsp;</a></li>
+									</ul>
 								</div>
 								<input name="group_name" id="f-group-create-name" class="form-control" type="text" pattern="^([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$" required oninvalid="setCustomValidity('Please enter only lowercase letters, numbers, and hyphens (-). The group name may not start or end with a hyphen.')" onchange="setCustomValidity('')" />
 							</div>

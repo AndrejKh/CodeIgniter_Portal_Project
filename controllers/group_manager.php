@@ -248,11 +248,7 @@ EORULE;
 		$this->output
 			->set_content_type('application/json')
 			->set_output(json_encode(
-				array_values(
-					array_filter($this->_findUsers($query), function($val) use($query) {
-						return !(!empty($query) && strstr($val, $query) === FALSE);
-					})
-				)
+				array_values($this->_findUsers($query))
 			));
 	}
 

@@ -17,6 +17,17 @@ $(function() {
          */
         CATEGORY_FOLD_THRESHOLD: 8,
 
+        /// Group name prefixes that can be shown in the group manager.
+        /// NB: To make group prefixes selectable in the group add dialog, the
+        /// view phtml must be edited.
+        GROUP_PREFIXES_RE:          /^(grp-|priv-|intake-|vault-|research-)/,
+
+        /// A subset of GROUP_PREFIXES_RE that cannot be selected.
+        GROUP_PREFIXES_RESERVED_RE: /^(priv-|vault-)/,
+
+        /// The default prefix when adding a new group.
+        GROUP_DEFAULT_PREFIX:       'research-',
+
         groupHierarchy: null, ///< A group hierarchy object. See YodaPortal.groupManager.load().
         groups:         null, ///< A list of group objects with member information. See YodaPortal.groupManager.load().
 
@@ -25,35 +36,48 @@ $(function() {
         zone: null,
         userNameFull: null, ///< The username, including the zone name.
 
-        /**
-         * \brief A list of access / membership levels.
-         */
+        /// A list of access / membership levels.
         accessLevels: ['reader', 'normal', 'manager'],
 
+        /// Icon classes for access levels.
         accessIcons: {
             'reader':  'glyphicon-eye-open',
             'normal':  'glyphicon-user',
             'manager': 'glyphicon-tower',
         },
 
+        /// Human-readable descriptions of access levels.
+        /// These are used in title attrs of membership icons and on Change Role buttons.
         accessNames: {
             'reader':  'Member with read-only access',
             'normal':  'Regular member with write access',
             'manager': 'Group manager',
         },
 
-        prevAccessLevel: function(current) {
-            var currentI = accessLevels.indexof(current);
+        /// Get the name of an access level one lower than the current one for
+        /// the given group.
+        prevAccessLevel: function(current, groupName) {
+            var prev = null;
+            var currentI = this.accessLevels.indexOf(current);
             if (currentI)
-                return accessLevels[currentI - 1];
-            return null;
+                prev = this.accessLevels[currentI - 1];
+
+            if (prev == 'reader' && !groupName.match(/^(research|intake)-/) && current == 'normal') {
+                // The reader access level is only defined for research and intake groups.
+                prev = null;
+            }
+
+            return prev;
         },
 
-        nextAccessLevel: function(current) {
-            var currentI = accessLevels.indexof(current);
-            if (currentI + 1 < accessLevels.length)
-                return accessLevels[currentI + 1];
-            return null;
+        /// Get the name of an access level one higher than the current one for
+        /// the given group.
+        nextAccessLevel: function(current, groupName) {
+            var next = null;
+            var currentI = this.accessLevels.indexOf(current);
+            if (currentI + 1 < this.accessLevels.length)
+                next = this.accessLevels[currentI + 1];
+            return next;
         },
 
         // Functions that check membership / access status of the
@@ -184,7 +208,7 @@ $(function() {
             var $groupPanel = $('.panel.groups');
             $groupPanel.find('.delete-button').toggleClass(
                 'disabled',
-                !userCanManage || !groupName.match(/^grp-/)
+                !userCanManage || groupName.match(that.GROUP_PREFIXES_RESERVED_RE)
             );
 
             // Build the group properties panel {{{
@@ -203,17 +227,17 @@ $(function() {
                     .select2('readonly', !userCanManage);
                 $groupProperties.find('#f-group-update-name').siblings('.input-group-addon')
                     .html(function() {
-                        var matches = groupName.match(/^(grp-|priv-)/, '');
+                        var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
                         return matches
                             ? matches[1]
                             : '&nbsp;&nbsp;';
                     });
                 $groupProperties.find('#f-group-update-name')
-                    .val(groupName.replace(/^(grp-|priv-)/, ''))
+                    .val(groupName.replace(that.GROUP_PREFIXES_RE, ''))
                     .prop('readonly', true)
                     .attr('title', 'Group names cannot be changed')
                     .attr('data-prefix', function() {
-                        var matches = groupName.match(/^(grp-|priv-)/, '');
+                        var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
                         return matches
                             ? matches[1]
                             : '';
@@ -358,7 +382,36 @@ $(function() {
 
             if (this.canManageGroup($('#group-list .active.group').attr('data-name'))) {
                 var $userPanel = $('.panel.users');
-                $userPanel.find('.update-button, .delete-button').removeClass('disabled');
+
+                var $promoteButton = $userPanel.find('.promote-button');
+                var $demoteButton  = $userPanel.find('.demote-button');
+
+                var selectedGroupName = $($('#group-list .group.active')[0]).attr('data-name');
+                var selectedGroup = this.groups[selectedGroupName];
+                var selectedUser = selectedGroup.members[userName];
+
+                var promoteTitle = 'Promote the selected user';
+                var demoteTitle  = 'Demote the selected user';
+
+                var prevAccess = this.prevAccessLevel(selectedUser.access, selectedGroupName);
+                var nextAccess = this.nextAccessLevel(selectedUser.access, selectedGroupName);
+
+                if (prevAccess) {
+                    $demoteButton.find('i').addClass('glyphicon ' + this.accessIcons[prevAccess]);
+                    $demoteButton.removeClass('disabled');
+                    $demoteButton.attr('data-target-role', prevAccess);
+                    demoteTitle += ' to ' + this.accessNames[prevAccess].toLowerCase();
+                }
+                if (nextAccess) {
+                    $promoteButton.find('i').addClass('glyphicon ' + this.accessIcons[nextAccess]);
+                    $promoteButton.removeClass('disabled');
+                    $promoteButton.attr('data-target-role', nextAccess);
+                    promoteTitle += ' to ' + this.accessNames[nextAccess].toLowerCase();
+                }
+
+                $promoteButton.attr('title', promoteTitle);
+                $demoteButton .attr('title',  demoteTitle);
+                $userPanel.find('.delete-button').removeClass('disabled');
             }
         },
 
@@ -366,9 +419,18 @@ $(function() {
          * \brief Deselects the selected user, if any.
          */
         deselectUser: function() {
-            var $userList = $('#user-list');
+            var $userPanel = $('.panel.users');
+            var $userList  = $('#user-list');
             $userList.find('.active').removeClass('active');
-            $('.panel.users').find('.update-button, .delete-button').addClass('disabled');
+            $userPanel.find('.update-button, .delete-button').addClass('disabled');
+            var $promoteButton = $userPanel.find('.promote-button');
+            var $demoteButton  = $userPanel.find('.demote-button');
+            $promoteButton.attr('title', 'Promote the selected user');
+            $demoteButton .attr('title', 'Demote the selected user');
+            $promoteButton.removeAttr('data-target-role');
+            $demoteButton .removeAttr('data-target-role');
+            $promoteButton.find('i').removeClass();
+            $demoteButton .find('i').removeClass();
         },
 
         /**
@@ -538,12 +600,14 @@ $(function() {
 
                             users.forEach(function(userName) {
                                 // Exclude users already in the group.
-                                if (!(userName in that.groups[$($el.attr('data-group')).val()].members))
+                                if (!(userName in that.groups[$($el.attr('data-group')).val()].members)) {
+                                    var nameAndZone = userName.split('#');
                                     results.push({
                                         id:   userName,
-                                        text: userName
+                                        text: nameAndZone[1] === that.zone ? nameAndZone[0] : userName
                                     });
-                                if (query === userName)
+                                }
+                                if (query === userName || query + '#' + that.zone === userName)
                                     inputMatches = true;
                             });
 
@@ -770,7 +834,7 @@ $(function() {
             var groupName = $(el).find('#f-user-create-group').val();
             var  userName = $(el).find('#f-user-create-name' ).val();
 
-            if (!userName.match(/^([a-z.]+|[a-z0-9_.-]+@[a-z0-9_.-]+)$/)) {
+            if (!userName.match(/^([a-z.]+|[a-z0-9_.-]+@[a-z0-9_.-]+)(#[a-zA-Z0-9_-]+)?$/)) {
                 alert('Please enter either an e-mail address or a name consisting only of lowercase chars and dots.');
                 return;
             }
@@ -850,6 +914,10 @@ $(function() {
             $('#user-list .user.active')
                 .addClass('update-pending disabled')
                 .attr('title', 'Update pending');
+
+            // Get the new role name from the button element before we deselect the user.
+            var newRole = $(el).attr('data-target-role');
+
             this.deselectUser();
 
             $.ajax({
@@ -859,17 +927,14 @@ $(function() {
                 data: {
                     group_name: groupName,
                      user_name: userName,
-                    new_role:
-                        // Toggle.
-                        that.groups[groupName].members[userName].isManager
-                        ? 'user' : 'manager'
+                    new_role:   newRole
                 },
             }).done(function(result) {
                 if ('status' in result)
                     console.log('User update completed with status ' + result.status);
                 if ('status' in result && result.status === 0) {
-                    that.groups[groupName].members[userName].isManager
-                        = !that.groups[groupName].members[userName].isManager;
+                    // Update user role.
+                    that.groups[groupName].members[userName].access = newRole
 
                     // Force-regenerate the user list.
                     that.deselectGroup();
@@ -1072,7 +1137,11 @@ $(function() {
             // Group creation {{{
 
             $('#modal-group-create').on('show.bs.modal', function() {
-                $('#f-group-create-name')       .val('').attr('data-prefix', 'grp-');
+                var $prefixDiv = $('#f-group-create-prefix-div');
+                $prefixDiv.find('button .text').html(that.GROUP_DEFAULT_PREFIX + '&nbsp;');
+
+
+                $('#f-group-create-name')       .val('').attr('data-prefix', that.GROUP_DEFAULT_PREFIX);
                 $('#f-group-create-description').val('');
                 var $selectedGroup = $('#group-list .group.active');
                 var  selectedGroupName;
@@ -1090,6 +1159,16 @@ $(function() {
                     $('#f-group-create-subcategory').select2('val', '');
                 }
             });
+            $('#modal-group-create #f-group-create-prefix-div a').on('click', function(e) {
+                // Select new group prefix.
+                var newPrefix = $(this).attr('data-value');
+
+                $('#f-group-create-prefix-div button .text').html(newPrefix + '&nbsp;');
+                $('#f-group-create-name').attr('data-prefix', newPrefix);
+
+                e.preventDefault();
+            });
+
             $('#modal-group-create').on('shown.bs.modal', function() {
                 // Auto-focus group name in group add dialog.
                 $('#f-group-create-name').focus();
@@ -1203,7 +1282,6 @@ $(function() {
                         '<span class="pull-right glyphicon glyphicon-eye-open" title="You have read access to this group"></span>'
                     );
                 }
-                console.log(this.groups[groupName]);
             }
 
             var selectedGroup = YodaPortal.storage.session.get('selected-group');
