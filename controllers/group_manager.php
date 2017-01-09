@@ -19,7 +19,6 @@ function explodeProperly($delim, $str) {
  */
 class Group_Manager extends MY_Controller {
 
-	protected $_users;         /// `[ user... ]`.
 	protected $_groups;        /// `[ group... ]`.
 	protected $_categories;    /// `[ category... ]`.
 	protected $_subcategories; /// `category => [ subcategory... ]...`.
@@ -38,7 +37,7 @@ EORULE;
 			} else {
 				$ruleBody = <<<EORULE
 rule {
-	uuGroupMemberships(*user, *groupList);
+	uuUserGetGroups(*user, true, *groupList);
 	uuJoin(',', *groupList, *groups);
 }
 EORULE;
@@ -110,29 +109,6 @@ EORULE;
 		}
 	}
 
-	protected function _getUsers() {
-		if (isset($this->_users)) {
-			return $this->_users;
-		} else {
-			$ruleBody = <<<EORULE
-rule {
-	uuGetUsers(*userList);
-	uuJoin(',', *userList, *users);
-}
-EORULE;
-			$rule = new ProdsRule(
-				$this->rodsuser->getRodsAccount(),
-				$ruleBody,
-				array(),
-				array(
-					'*users'
-				)
-			);
-			$result = $rule->execute();
-			return $this->_users = explodeProperly(',', $result['*users']);
-		}
-	}
-
 	protected function _findUsers($query) {
 		$ruleBody = <<<EORULE
 rule {
@@ -157,7 +133,7 @@ EORULE;
 	protected function _getGroupMembers($groupName) {
 		$ruleBody = <<<EORULE
 rule {
-	uuGroupGetMembers(*groupName, *memberList);
+	uuGroupGetMembers(*groupName, true, true, *memberList);
 	uuJoin(',', *memberList, *members);
 }
 EORULE;
@@ -172,7 +148,15 @@ EORULE;
 			)
 		);
 		$result = $rule->execute();
-		return explodeProperly(',', $result['*members']);
+		$members = array();
+		foreach (explodeProperly(',', $result['*members']) as $memberString) {
+			list($type, $name) = explode(':', $memberString);
+			$types = array('r' => 'reader',
+			               'n' => 'normal',
+			               'm' => 'manager');
+			$members[$name] = array('access' => $types[$type]);
+		}
+		return $members;
 	}
 
 	protected function _getGroupProperties($groupName) {
@@ -180,8 +164,6 @@ EORULE;
 rule {
 	uuGroupGetCategory(*groupName, *category, *subcategory);
 	uuGroupGetDescription(*groupName, *description);
-	uuGroupGetManagers(*groupName, *managerList);
-	uuJoin(',', *managerList, *managers);
 }
 EORULE;
 		$rule = new ProdsRule(
@@ -194,7 +176,6 @@ EORULE;
 				'*category',
 				'*subcategory',
 				'*description',
-				'*managers',
 			)
 		);
 		$result = $rule->execute();
@@ -203,7 +184,6 @@ EORULE;
 			'category'    => $result['*category'],
 			'subcategory' => $result['*subcategory'],
 			'description' => $result['*description'],
-			'managers'    => explodeProperly(',', $result['*managers']),
 		);
 	}
 
@@ -215,17 +195,9 @@ EORULE;
 		foreach ($groups as $groupName) {
 			$properties = $this->_getGroupProperties($groupName);
 			if (!empty($properties['category']) && !empty($properties['subcategory'])) {
-
-				$members = array();
-				foreach ($this->_getGroupMembers($groupName) as $member)
-					// If only PHP's array_map worked properly with maps...
-					$members[$member] = array(
-						'isManager' => in_array($member, $properties['managers'])
-					);
-
 				$hierarchy[$properties['category']][$properties['subcategory']][$groupName] = array(
 					'description' => $properties['description'],
-					'members'     => $members,
+					'members'     => $this->_getGroupMembers($groupName),
 				);
 			}
 		}
@@ -276,12 +248,7 @@ EORULE;
 		$this->output
 			->set_content_type('application/json')
 			->set_output(json_encode(
-				array_values(
-					//array_filter($this->_getUsers(), function($val) use($query) {
-					array_filter($this->_findUsers($query), function($val) use($query) {
-						return !(!empty($query) && strstr($val, $query) === FALSE);
-					})
-				)
+				array_values($this->_findUsers($query))
 			));
 	}
 
@@ -482,7 +449,6 @@ EORULE;
 	}
 
 	public function index() {
-		$groups = $this->_getUserGroups();
 
 		$this->load->view('common-start', array(
 			 'styleIncludes' => array('css/group-manager.css'),
@@ -495,6 +461,7 @@ EORULE;
 		$this->load->view('group-manager_index', array(
 			'groupHierarchy'  => $this->_getGroupHierarchy(),
 			'userType'        => $this->rodsuser->getUserInfo()['type'],
+			'userZone'        => $this->rodsuser->getUserInfo()['zone'],
 		));
 		$this->load->view('common-end');
 	}
