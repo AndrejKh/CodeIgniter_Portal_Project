@@ -1238,7 +1238,7 @@ $(function() {
                 var groupName = $('#group-list .group.active').attr('data-name');
                 var  userName = $('#user-list  .user.active').attr('data-name');
                 $(this).find('.group').text(groupName);
-                $(this).find('.user').text(userName);
+                $(this).find('.user').text(userName.split('#')[0]);
             });
 
             if (!YodaPortal.storage.session.get('confirm-user-delete', true))
