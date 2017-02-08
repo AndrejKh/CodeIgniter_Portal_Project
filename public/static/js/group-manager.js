@@ -1168,6 +1168,8 @@ $(function() {
 
                 e.preventDefault();
             });
+            if (!this.isRodsAdmin)
+                $('#f-group-create-prefix-grp').addClass('hidden');
 
             $('#modal-group-create').on('shown.bs.modal', function() {
                 // Auto-focus group name in group add dialog.
