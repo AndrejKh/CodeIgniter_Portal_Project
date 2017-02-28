@@ -20,7 +20,7 @@ $(function() {
         /// Group name prefixes that can be shown in the group manager.
         /// NB: To make group prefixes selectable in the group add dialog, the
         /// view phtml must be edited.
-        GROUP_PREFIXES_RE:          /^(grp-|priv-|intake-|vault-|research-)/,
+        GROUP_PREFIXES_RE:          /^(grp-|priv-|intake-|vault-|research-|datamanager-)/,
 
         /// A subset of GROUP_PREFIXES_RE that cannot be selected.
         GROUP_PREFIXES_RESERVED_RE: /^(priv-|vault-)/,
@@ -153,6 +153,32 @@ $(function() {
             }
         },
 
+        /**
+         * \brief Check whether the user is allowed to create the datamanager
+         *        group in the given category.
+         *
+         * \param categoryName
+         *
+         * \return 
+         */
+        canCreateDatamanagerGroup: function(categoryName) {
+
+            // Note: An existing datamanager group may not be visible to the
+            //          user, even if they have priv-category-add.
+            //          Is it user-friendly enough to allow them to attempt to
+            //          create the group, and fail with an error message if it
+            //          already exists?
+            //          For now I assume it is.
+
+            return (// if the category name can legally be translated to a group name ...
+                    // XXX wip (regex taken from group name input element).
+                       categoryName.match(/^([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$/)
+                    // ... and the datamanager group does not yet exist (but see the note above).
+                    && !(('datamanager-' + categoryName) in this.groups)
+                    // ... and the user has priv-category-add or is rodsadmin.
+                    && (this.isMemberOfGroup('priv-category-add') || this.isRodsAdmin));
+        },
+
         // }}}
 
         /**
@@ -208,8 +234,13 @@ $(function() {
             var $groupPanel = $('.panel.groups');
             $groupPanel.find('.delete-button').toggleClass(
                 'disabled',
-                !userCanManage || groupName.match(that.GROUP_PREFIXES_RESERVED_RE)
+                // Why do I need to boolify this?
+                !!(!userCanManage || groupName.match(that.GROUP_PREFIXES_RESERVED_RE))
             );
+
+            // The category of a datamanager group cannot be changed - the
+            // category name is part of the group name.
+            var canEditCategory = userCanManage && !groupName.match(/^datamanager-/);
 
             // Build the group properties panel {{{
 
@@ -221,7 +252,7 @@ $(function() {
 
                 $groupProperties.find('#f-group-update-category')
                     .select2('data', { id: group.category, text: group.category })
-                    .select2('readonly', !userCanManage);
+                    .select2('readonly', !canEditCategory);
                 $groupProperties.find('#f-group-update-subcategory')
                     .select2('data', { id: group.subcategory, text: group.subcategory })
                     .select2('readonly', !userCanManage);
@@ -513,6 +544,20 @@ $(function() {
                     $(this).select2('val', '');
                 }).on('change', function() {
                     $($(this).attr('data-subcategory')).select2('val', '');
+
+                    if (this.id === 'f-group-create-category') {
+                        if (that.canCreateDatamanagerGroup(this.value))
+                            $('#f-group-create-prefix-datamanager').removeClass('hidden');
+                        else
+                            $('#f-group-create-prefix-datamanager').addClass('hidden');
+
+                        if ($('#f-group-create-name').attr('data-prefix') === 'datamanager-') {
+                            // Reset the group name + prefix by pretending that
+                            // the user clicked on the default prefix.
+                            $('#f-group-create-prefix-div a[data-value="' + that.GROUP_DEFAULT_PREFIX + '"]').click();
+                            $('#f-group-create-name').val('');
+                        }
+                    }
                 });
             });
 
@@ -1140,9 +1185,18 @@ $(function() {
                 var $prefixDiv = $('#f-group-create-prefix-div');
                 $prefixDiv.find('button .text').html(that.GROUP_DEFAULT_PREFIX + '&nbsp;');
 
+                // Set up the group prefix field thingy by "clicking" on the default option.
+                // (the event handler for that is below this one)
+                $('#f-group-create-prefix-div a[data-value="' + that.GROUP_DEFAULT_PREFIX + '"]').click();
 
-                $('#f-group-create-name')       .val('').attr('data-prefix', that.GROUP_DEFAULT_PREFIX);
+                $('#f-group-create-name')       .val('');
                 $('#f-group-create-description').val('');
+
+                // The 'datamanager-' prefix option becomes selectable once the
+                // user selects a category that they are allowed to create the
+                // datamanager group in.
+                $('#f-group-create-prefix-datamanager').addClass('hidden');
+
                 var $selectedGroup = $('#group-list .group.active');
                 var  selectedGroupName;
                 if (
@@ -1154,11 +1208,16 @@ $(function() {
                     // Fill in the (sub)category of the currently selected group.
                     $('#f-group-create-category')   .select2('val', that.groups[selectedGroupName].category);
                     $('#f-group-create-subcategory').select2('val', that.groups[selectedGroupName].subcategory);
+
+                    if (that.canCreateDatamanagerGroup(that.groups[selectedGroupName].category))
+                        $('#f-group-create-prefix-datamanager').removeClass('hidden');
+
                 } else {
                     $('#f-group-create-category')   .select2('val', '');
                     $('#f-group-create-subcategory').select2('val', '');
                 }
             });
+
             $('#modal-group-create #f-group-create-prefix-div a').on('click', function(e) {
                 // Select new group prefix.
                 var newPrefix = $(this).attr('data-value');
@@ -1166,8 +1225,19 @@ $(function() {
                 $('#f-group-create-prefix-div button .text').html(newPrefix + '&nbsp;');
                 $('#f-group-create-name').attr('data-prefix', newPrefix);
 
+                if (newPrefix === 'datamanager-') {
+                    // Autofill the group name - the user cannot customize the
+                    // name of a datamanager group.
+                    $('#f-group-create-name').val($('#f-group-create-category').val());
+                    $('#f-group-create-name').prop('readonly', true);
+                } else {
+                    $('#f-group-create-name').prop('readonly', false);
+                }
+
                 e.preventDefault();
             });
+
+            // Only rodsadmin can select the 'grp-' prefix.
             if (!this.isRodsAdmin)
                 $('#f-group-create-prefix-grp').addClass('hidden');
 
