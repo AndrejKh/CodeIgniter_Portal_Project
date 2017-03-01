@@ -194,6 +194,7 @@ $(function() {
 									<button type="button" id="f-group-create-prefix-button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="text">research-&nbsp;</span><span class="caret"></span></button>
 									<ul class="dropdown-menu">
 										<li id="f-group-create-prefix-grp"><a href="#" data-value="grp-">grp-&nbsp;</a></li>
+										<li id="f-group-create-prefix-datamanager"><a href="#" data-value="datamanager-">datamanager-&nbsp;</a></li>
 										<li><a href="#" data-value="research-">research-&nbsp;</a></li>
 										<li><a href="#" data-value="intake-">intake-&nbsp;</a></li>
 									</ul>
