@@ -635,11 +635,11 @@ $(function() {
                         dataType: 'json',
                         data: function (term, page) {
                             return {
-                                query: term
+                                query: term.toLowerCase()
                             };
                         },
                         results: function (users) {
-                            var query   = $el.data('select2').search.val();
+                            var query   = $el.data('select2').search.val().toLowerCase();
                             var results = [];
                             var inputMatches = false;
 
