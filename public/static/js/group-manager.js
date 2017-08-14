@@ -496,6 +496,13 @@ $(function() {
                             var query   = $el.data('select2').search.val();
                             var inputMatches = false;
 
+                            // For legacy reasons we allow selecting existing categories with illegal names.
+                            // New categories (where we show '(create)' in the dropdown) must adhere to the new rules:
+                            // They must be valid as part of a group name -> only lowercase letters, numbers and hyphens.
+                            //
+                            // When we drop support for the old category name style this code can be updated to
+                            // automatically lowercase user input (see the username input code for an example).
+
                             categories.forEach(function(category) {
                                 if (query === category)
                                     inputMatches = true;

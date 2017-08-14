@@ -285,7 +285,7 @@ EORULE;
 
 	public function groupUpdate() {
 		$toSet = array();
-		foreach (array('description', 'category', 'subcategory') as $property) {
+		foreach (array('category', 'subcategory', 'description') as $property) {
 			if (in_array('group_'.$property, array_keys($this->input->post())))
 				$toSet[$property] = $this->input->post('group_'.$property);
 		}
@@ -314,7 +314,7 @@ EORULE;
 			);
 			$result = $rule->execute();
 
-			if ($result['*status'] > 0)
+			if ($result['*status'] != 0)
 				break;
 		}
 
