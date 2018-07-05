@@ -23,38 +23,26 @@ class Group_Manager extends MY_Controller {
     protected $_categories;    /// `[ category... ]`.
     protected $_subcategories; /// `category => [ subcategory... ]...`.
 
-    protected function _getUserGroups() {
+    protected function _getGroupData() {
         if (isset($this->_groups)) {
             return $this->_groups;
         } else {
-            if ($this->rodsuser->getUserInfo()['type'] == 'rodsadmin') {
                 $ruleBody = <<<EORULE
 rule {
-	uuGetAllGroups(*groupList);
-	uuJoin(',', *groupList, *groups);
+	uuGetAllGroupData(*groupData);
 }
 EORULE;
-            } else {
-                $ruleBody = <<<EORULE
-rule {
-	uuUserGetGroups(*user, true, *groupList);
-	uuJoin(',', *groupList, *groups);
-}
-EORULE;
-            }
-            $rule = new ProdsRule(
-                $this->rodsuser->getRodsAccount(),
-                $ruleBody,
-                array(
-                    '*user' => $this->rodsuser->getUsername()
-                ),
-                array(
-                    '*groups'
-                )
-            );
-            $result = $rule->execute();
-            return $this->_groups = explodeProperly(',', $result['*groups']);
         }
+        $rule = new ProdsRule(
+            $this->rodsuser->getRodsAccount(),
+            $ruleBody,
+            array(),
+            array(
+                '*groupData'
+            )
+        );
+        $result = $rule->execute();
+        return json_decode($result['*groupData']);
     }
 
     protected function _getCategories() {
@@ -130,74 +118,28 @@ EORULE;
         return explodeProperly(',', $result['*users']);
     }
 
-    protected function _getGroupMembers($groupName) {
-        $ruleBody = <<<EORULE
-rule {
-	uuGroupGetMembers(*groupName, true, true, *memberList);
-	uuJoin(',', *memberList, *members);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*groupName' => $groupName,
-            ),
-            array(
-                '*members',
-            )
-        );
-        $result = $rule->execute();
-        $members = array();
-        foreach (explodeProperly(',', $result['*members']) as $memberString) {
-            list($type, $name) = explode(':', $memberString);
-            $types = array('r' => 'reader',
-                'n' => 'normal',
-                'm' => 'manager');
-            $members[$name] = array('access' => $types[$type]);
-        }
-        return $members;
-    }
-
-    protected function _getGroupProperties($groupName) {
-        $ruleBody = <<<EORULE
-rule {
-	uuGroupGetCategory(*groupName, *category, *subcategory);
-	uuGroupGetDescription(*groupName, *description);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*groupName' => $groupName,
-            ),
-            array(
-                '*category',
-                '*subcategory',
-                '*description',
-            )
-        );
-        $result = $rule->execute();
-
-        return array(
-            'category'    => $result['*category'],
-            'subcategory' => $result['*subcategory'],
-            'description' => $result['*description'],
-        );
-    }
-
     protected function _getGroupHierarchy() {
-        $groups = $this->_getUserGroups();
-
+        $groups = $this->_getGroupData();
         $hierarchy = array();
 
-        foreach ($groups as $groupName) {
-            $properties = $this->_getGroupProperties($groupName);
-            if (!empty($properties['category']) && !empty($properties['subcategory'])) {
-                $hierarchy[$properties['category']][$properties['subcategory']][$groupName] = array(
-                    'description' => $properties['description'],
-                    'members'     => $this->_getGroupMembers($groupName),
+        foreach ($groups as $group) {
+            $group = (array) $group;
+            // Check YoDa (sub)category
+            if (!empty($group['category']) && !empty($group['subCategory'])) {
+                // Group members
+                $members = array();
+                foreach($group['members'] as $memberString) {
+                    list($type, $name) = explode(':', $memberString);
+                    $types = array(
+                        'r' => 'reader',
+                        'n' => 'normal',
+                        'm' => 'manager'
+                    );
+                    $members[$name] = array('access' => $types[$type]);
+                }
+                $hierarchy[$group['category']][$group['subCategory']][$group['name']] = array(
+                    'description' => (!empty($group['description']) ? $group['description'] : null),
+                    'members'     => $members,
                 );
             }
         }
