@@ -29,7 +29,7 @@ class Group_Manager extends MY_Controller {
         } else {
                 $ruleBody = <<<EORULE
 rule {
-	uuGetAllGroupData(*groupData);
+	uuGetGroupData(*groupData);
 }
 EORULE;
         }
@@ -125,19 +125,26 @@ EORULE;
         foreach ($groups as $group) {
             $group = (array) $group;
             // Check YoDa (sub)category
-            if (!empty($group['category']) && !empty($group['subCategory'])) {
+            if (!empty($group['category']) && !empty($group['subcategory'])) {
                 // Group members
                 $members = array();
-                foreach($group['members'] as $memberString) {
-                    list($type, $name) = explode(':', $memberString);
-                    $types = array(
-                        'r' => 'reader',
-                        'n' => 'normal',
-                        'm' => 'manager'
-                    );
-                    $members[$name] = array('access' => $types[$type]);
+
+                //Managers
+                foreach($group['managers'] as $member) {
+                    $members[$member] = array('access' => 'manager');
                 }
-                $hierarchy[$group['category']][$group['subCategory']][$group['name']] = array(
+
+                // Normal users
+                foreach($group['members'] as $member) {
+                    $members[$member] = array('access' => 'normal');
+                }
+
+                // Read users
+                foreach($group['read'] as $member) {
+                    $members[$member] = array('access' => 'reader');
+                }
+
+                $hierarchy[$group['category']][$group['subcategory']][$group['name']] = array(
                     'description' => (!empty($group['description']) ? $group['description'] : null),
                     'members'     => $members,
                 );
