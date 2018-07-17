@@ -28,9 +28,11 @@ class Group_Manager extends MY_Controller {
             return $this->_groups;
         } else {
                 $ruleBody = <<<EORULE
-rule {
-	uuGetGroupData(*groupData);
-}
+@external
+def main(rule_args, callback, rei):
+    import rules_uu
+
+    rules_uu.uuGetGroupData(rule_args, callback, rei)
 EORULE;
         }
         $rule = new ProdsRule(
@@ -38,11 +40,12 @@ EORULE;
             $ruleBody,
             array(),
             array(
-                '*groupData'
+                'ruleExecOut'
             )
         );
+        $rule->options = array('instance_name'=>'irods_rule_engine_plugin-python-instance');
         $result = $rule->execute();
-        return json_decode($result['*groupData']);
+        return json_decode($result['ruleExecOut']);
     }
 
     protected function _getCategories() {
