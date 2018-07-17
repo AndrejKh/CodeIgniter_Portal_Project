@@ -129,14 +129,14 @@ EORULE;
                 // Group members
                 $members = array();
 
-                //Managers
-                foreach($group['managers'] as $member) {
-                    $members[$member] = array('access' => 'manager');
-                }
-
                 // Normal users
                 foreach($group['members'] as $member) {
                     $members[$member] = array('access' => 'normal');
+                }
+
+                //Managers
+                foreach($group['managers'] as $member) {
+                    $members[$member] = array('access' => 'manager');
                 }
 
                 // Read users
