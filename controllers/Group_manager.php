@@ -26,18 +26,10 @@ class Group_Manager extends MY_Controller {
     protected function _getGroupData() {
         if (isset($this->_groups)) {
             return $this->_groups;
-        } else {
-                $ruleBody = <<<EORULE
-@external
-def main(rule_args, callback, rei):
-    import rules_uu
-
-    rules_uu.uuGetGroupData(rule_args, callback, rei)
-EORULE;
         }
         $rule = new ProdsRule(
             $this->rodsuser->getRodsAccount(),
-            $ruleBody,
+            '@external rule { uuGetGroupData }',
             array(),
             array(
                 'ruleExecOut'
