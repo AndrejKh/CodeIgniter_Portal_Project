@@ -27,15 +27,31 @@ class Group_Manager extends MY_Controller {
         if (isset($this->_groups)) {
             return $this->_groups;
         }
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            '@external rule { uuGetGroupData }',
-            array(),
-            array(
-                'ruleExecOut'
-            )
-        );
-        $rule->options = array('instance_name'=>'irods_rule_engine_plugin-python-instance');
+        if ($this->rodsuser->getUserInfo()['type'] == 'rodsadmin') {
+            $rule = new ProdsRule(
+                $this->rodsuser->getRodsAccount(),
+                '@external rule { uuGetGroupData }',
+                array(),
+                array(
+                    'ruleExecOut'
+                )
+            );
+            $rule->options = array('instance_name'=>'irods_rule_engine_plugin-python-instance');
+        } else {
+            $rulebody = <<<EORULE
+rule {
+        uuAdminGetGroupData();
+}
+EORULE;
+            $rule = new ProdsRule(
+                $this->rodsuser->getRodsAccount(),
+                $rulebody,
+                array(),
+                array(
+                    'ruleExecOut'
+                )
+            );
+        }
         $result = $rule->execute();
         return json_decode($result['ruleExecOut']);
     }
