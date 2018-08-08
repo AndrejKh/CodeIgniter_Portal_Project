@@ -2,7 +2,7 @@
  * \file
  * \brief     Yoda Group Manager frontend.
  * \author    Chris Smeele
- * \copyright Copyright (c) 2015, 2017, Utrecht University
+ * \copyright Copyright (c) 2015-2018, Utrecht University
  * \license   GPLv3, see LICENSE
  */
 
@@ -190,9 +190,21 @@ $(function() {
             var $groupList = $('#group-list');
 
             var $group = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
+
             $group.parents('.category').children('a.name').removeClass('collapsed');
             $group.parents('.category').children('.category-ul').removeClass('hidden');
             $group.parents('.category').children('.category-ul').collapse('show');
+
+            if ($group.parents('.category').find('.subcategory').length > 1)  {
+                // Unfold subcategory.
+                // Skip this if there is only one subcategory. In that case the
+                // subcat will be automagically expanded by a
+                // 'shown.bs.collapse' event handler.
+                // (unfolding twice looks jittery)
+                $group.parents('.subcategory').children('a.name').removeClass('collapsed');
+                $group.parents('.subcategory').children('.subcategory-ul').removeClass('hidden');
+                $group.parents('.subcategory').children('.subcategory-ul').collapse('show');
+            }
         },
 
         updateGroupMemberCount: function(groupName) {
@@ -1136,12 +1148,25 @@ $(function() {
             // Group list {{{
 
             $groupList.on('show.bs.collapse', function(e) {
-                $(e.target).parent('.category').find('.triangle')
+                $(e.target).parent('.list-group-item').find('.triangle').first()
                     .removeClass('glyphicon-triangle-right')
                        .addClass('glyphicon-triangle-bottom');
             });
+
+            $groupList.on('shown.bs.collapse', function(e) {
+                // Once a category is fully opened, open its subcategory (if there is only one).
+                var subs = $(e.target).children(".subcategory");
+                if (subs.length == 1) {
+                    // Only one subcategory, expand it automatically.
+                    subs.first().children('a.name').removeClass('collapsed');
+                    subs.first().children('.subcategory-ul').removeClass('hidden');
+                    subs.first().children('.subcategory-ul').collapse('show');
+                }
+            });
+
+
             $groupList.on('hide.bs.collapse', function(e) {
-                $(e.target).parent('.category').find('.triangle')
+                $(e.target).parent('.list-group-item').find('.triangle').first()
                     .removeClass('glyphicon-triangle-bottom')
                        .addClass('glyphicon-triangle-right');
             });

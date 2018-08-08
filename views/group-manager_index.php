@@ -38,31 +38,37 @@ $(function() {
 		ksort($subcategories);
 		foreach ($subcategories as $subcategory => $groups) {
 ?>
-	<div class="list-group-item subcategory" data-name="<?php echo htmlentities($subcategory); ?>"><div class="name"><?php echo htmlentities($subcategory); ?></div>
-	<div class="list-group subcategory-ul">
+			<div class="list-group-item subcategory" data-name="<?php echo htmlentities($subcategory); ?>">
+				<a class="name collapsed" data-toggle="collapse" data-parent="#subcategory-<?php echo $j?>" href="#subcategory-<?php echo $j?>-ul">
+					<i class="glyphicon glyphicon-triangle-right triangle"></i>
+			<?php echo htmlentities($subcategory); ?>
+				</a>
+
+				<div class="list-group collapse subcategory-ul" id="subcategory-<?php echo $j?>-ul">
 <?php
 			ksort($groups);
 			foreach ($groups as $group => $properties) {
 ?>
-				<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo htmlentities($group); ?>">
-					<?php echo htmlentities($group); ?>
-				</a>
+					<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo htmlentities($group); ?>">
+						<?php echo htmlentities($group); ?>
+					</a>
 <?php
 				$k++;
 			}
 ?>
-	</div>
-	</div>
+				</div>
+			</div>
 <?php
 			$j++;
 		}
 ?>
-	</div>
+		</div>
 	</div>
 <?php
 		$i++;
 	}
 ?>
+
 			</div>
 			<div class="panel-footer clearfix">
 				<div class="input-group-sm pull-left">
