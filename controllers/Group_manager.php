@@ -28,19 +28,35 @@ class Group_Manager extends MY_Controller {
             return $this->_groups;
         }
 
-        $rulebody = <<<EORULE
+        if ($this->rodsuser->getUserInfo()['type'] == 'rodsadmin') {
+            $rulebody = <<<EORULE
 rule {
         uuGetGroupData();
 }
 EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $rulebody,
-            array(),
-            array(
-                'ruleExecOut'
-            )
-        );
+            $rule = new ProdsRule(
+                $this->rodsuser->getRodsAccount(),
+                $rulebody,
+                array(),
+                array(
+                    'ruleExecOut'
+                )
+            );
+	} else {
+            $rulebody = <<<EORULE
+rule {
+        uuGetUserGroupData();
+}
+EORULE;
+            $rule = new ProdsRule(
+                $this->rodsuser->getRodsAccount(),
+                $rulebody,
+                array(),
+                array(
+                    'ruleExecOut'
+                )
+            );
+	}
 
         $result = $rule->execute();
         return json_decode($result['ruleExecOut']);
