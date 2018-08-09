@@ -45,13 +45,16 @@ EORULE;
 	} else {
             $rulebody = <<<EORULE
 rule {
-        uuGetUserGroupData();
+        uuGetUserGroupData(*user, *zone);
 }
 EORULE;
             $rule = new ProdsRule(
                 $this->rodsuser->getRodsAccount(),
                 $rulebody,
-                array(),
+                array(
+                    '*user' => $this->rodsuser->getUserInfo()['name'],
+                    '*zone' => $this->rodsuser->getUserInfo()['zone']
+                ),
                 array(
                     'ruleExecOut'
                 )
