@@ -275,19 +275,34 @@ $(function() {
                             ? matches[1]
                             : '&nbsp;&nbsp;';
                     });
+                var prefix = function() {
+                    var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
+                    return matches
+                        ? matches[1].slice(0, -1)
+                        : '';
+                }();
                 $groupProperties.find('#f-group-update-name')
                     .val(groupName.replace(that.GROUP_PREFIXES_RE, ''))
                     .prop('readonly', true)
                     .attr('title', 'Group names cannot be changed')
-                    .attr('data-prefix', function() {
-                        var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
-                        return matches
-                            ? matches[1]
-                            : '';
-                    });
+                    .attr('data-prefix', prefix + '-');
                 $groupProperties.find('#f-group-update-description')
                     .val(group.description)
                     .prop('readonly', !userCanManage);
+
+                var $dataclas = $groupProperties.find('#f-group-update-data-classification');
+
+                $dataclas.find('.option-unset').remove();
+                if (group.data_classification === 'UNSET') {
+                    $dataclas.append($('<option class="option-unset" value="UNSET">**Classification not yet provided**</option>'))
+                }
+                $dataclas.val(group.data_classification)
+                        .select2('readonly', !userCanManage)
+                        .trigger('change');
+                $dataclas.find('.unspecified-option')
+                    // "unspecified" is only available to research groups.
+                    .attr('disabled', prefix === 'research' ? null : 'disabled');
+
                 $groupProperties.find('#f-group-update-submit')
                     .toggleClass('hidden', !userCanManage);
             })();
@@ -739,11 +754,12 @@ $(function() {
             }
 
             var newProperties = {
-                name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
-                             + $(el).find('#f-group-'+action+'-name'     ).val(),
-                description: $(el).find('#f-group-'+action+'-description').val(),
-                category:    $(el).find('#f-group-'+action+'-category'   ).val(),
-                subcategory: $(el).find('#f-group-'+action+'-subcategory').val(),
+                name:                $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
+                                   + $(el).find('#f-group-'+action+'-name'     ).val(),
+                description:         $(el).find('#f-group-'+action+'-description').val(),
+                data_classification: $(el).find('#f-group-'+action+'-data-classification').val(),
+                category:            $(el).find('#f-group-'+action+'-category'   ).val(),
+                subcategory:         $(el).find('#f-group-'+action+'-subcategory').val(),
             };
 
             if (newProperties.category === '' || newProperties.subcategory === '') {
@@ -764,15 +780,19 @@ $(function() {
             }
 
             var postData = {
-                group_name:        newProperties.name,
-                group_description: newProperties.description,
-                group_category:    newProperties.category,
-                group_subcategory: newProperties.subcategory,
+                group_name:                newProperties.name,
+                group_description:         newProperties.description,
+                group_data_classification: newProperties.data_classification,
+                group_category:            newProperties.category,
+                group_subcategory:         newProperties.subcategory,
             };
 
             if (action === 'update') {
                 var selectedGroup = this.groups[$($('#group-list .group.active')[0]).attr('data-name')];
-                ['description', 'category', 'subcategory'].forEach(function(item) {
+                ['description',
+                 'data_classification',
+                 'category',
+                 'subcategory'].forEach(function(item) {
                     // Filter out fields that have not changed.
                     if (selectedGroup[item] === newProperties[item])
                         delete postData['group_' + item];
@@ -1095,6 +1115,7 @@ $(function() {
          *         'SUBCATEGORY_NAME': {
          *           'GROUP_NAME': {
          *             'description': 'GROUP_DESCRIPTION',
+         *             'data-classification': 'GROUP_DATA_CLASSIFICATION',
          *             'members': {
          *               'USER_NAME': {
          *                 'access': (reader | normal | manager)
@@ -1125,6 +1146,7 @@ $(function() {
                                 subcategory: subcategoryName,
                                 name:        groupName,
                                 description: hier[categoryName][subcategoryName][groupName].description,
+                                data_classification: hier[categoryName][subcategoryName][groupName].data_classification,
                                 members:     hier[categoryName][subcategoryName][groupName].members
                             };
                 return groups;
@@ -1224,6 +1246,9 @@ $(function() {
                 $('#f-group-create-name')       .val('');
                 $('#f-group-create-description').val('');
 
+                // The data classification field is already reset by the
+                // 'click' event handler on the prefix field.
+
                 // The 'datamanager-' prefix option becomes selectable once the
                 // user selects a category that they are allowed to create the
                 // datamanager group in.
@@ -1264,6 +1289,17 @@ $(function() {
                     $('#f-group-create-name').prop('readonly', true);
                 } else {
                     $('#f-group-create-name').prop('readonly', false);
+                }
+
+                var $dataclas = $('#f-group-create-data-classification');
+
+                // Update data classification options.
+                if (newPrefix === 'research-') {
+                    $dataclas.find('.unspecified-option').attr('disabled', null);
+                    $dataclas.val('unspecified').trigger('change');
+                } else {
+                    $dataclas.val('sensitive').trigger('change');
+                    $dataclas.find('.unspecified-option').attr('disabled', 'disabled');
                 }
 
                 e.preventDefault();
@@ -1365,6 +1401,7 @@ $(function() {
             // }}}
 
             this.selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
+            $('.selectify-data-classification').select2();
 
             if (this.isMemberOfGroup('priv-group-add') || this.isRodsAdmin) {
                 var $groupPanel = $('.panel.groups');

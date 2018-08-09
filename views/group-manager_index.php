@@ -114,6 +114,18 @@ $(function() {
 						</div>
 					</div>
 					<div class="form-group">
+						<label class="col-sm-4 control-label" for="f-group-update-data-classification">Data classification</label>
+						<div class="col-sm-8">
+							<select name="group_data_classification" id="f-group-update-data-classification" class="selectify-data-classification">
+								<option value="unspecified" class="unspecified-option">Unspecified</option>
+								<option value="critical">Critical</option>
+								<option value="sensitive">Sensitive</option>
+								<option value="basic">Basic</option>
+								<option value="public">Public</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
 						<label class="col-sm-4 control-label" for="f-group-update-description">Group description</label>
 						<div class="col-sm-8">
 							<input name="group_description" id="f-group-update-description" class="form-control" type="text" placeholder="Enter a short description" pattern="^[a-zA-Z0-9,.()_ -]*$" oninvalid="setCustomValidity('Please enter only letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).')" onchange="setCustomValidity('')" />
@@ -207,6 +219,18 @@ $(function() {
 								</div>
 								<input name="group_name" id="f-group-create-name" class="form-control" type="text" pattern="^([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$" required oninvalid="setCustomValidity('Please enter only lowercase letters, numbers, and hyphens (-). The group name may not start or end with a hyphen.')" onchange="setCustomValidity('')" />
 							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-4 control-label" for="f-group-create-data-classification">Data classification</label>
+						<div class="col-sm-8">
+							<select name="group_data_classification" id="f-group-create-data-classification" class="selectify-data-classification">
+								<option value="unspecified" class="unspecified-option">Unspecified</option>
+								<option value="critical">Critical</option>
+								<option value="sensitive">Sensitive</option>
+								<option value="basic">Basic</option>
+								<option value="public">Public</option>
+							</select>
 						</div>
 					</div>
 					<div class="form-group">
