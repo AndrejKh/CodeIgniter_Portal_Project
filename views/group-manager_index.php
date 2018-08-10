@@ -113,15 +113,15 @@ $(function() {
 							</div>
 						</div>
 					</div>
-					<div class="form-group">
+					<div class="form-group data-classification">
 						<label class="col-sm-4 control-label" for="f-group-update-data-classification">Data classification</label>
 						<div class="col-sm-8">
 							<select name="group_data_classification" id="f-group-update-data-classification" class="selectify-data-classification">
 								<option value="unspecified" class="unspecified-option">Unspecified</option>
-								<option value="critical">Critical</option>
-								<option value="sensitive">Sensitive</option>
-								<option value="basic">Basic</option>
 								<option value="public">Public</option>
+								<option value="basic">Basic</option>
+								<option value="sensitive">Sensitive</option>
+								<option value="critical">Critical</option>
 							</select>
 						</div>
 					</div>
@@ -221,15 +221,15 @@ $(function() {
 							</div>
 						</div>
 					</div>
-					<div class="form-group">
+					<div class="form-group data-classification">
 						<label class="col-sm-4 control-label" for="f-group-create-data-classification">Data classification</label>
 						<div class="col-sm-8">
 							<select name="group_data_classification" id="f-group-create-data-classification" class="selectify-data-classification">
 								<option value="unspecified" class="unspecified-option">Unspecified</option>
-								<option value="critical">Critical</option>
-								<option value="sensitive">Sensitive</option>
-								<option value="basic">Basic</option>
 								<option value="public">Public</option>
+								<option value="basic">Basic</option>
+								<option value="sensitive">Sensitive</option>
+								<option value="critical">Critical</option>
 							</select>
 						</div>
 					</div>

@@ -157,7 +157,7 @@ EORULE;
 
                 $hierarchy[$group['category']][$group['subcategory']][$group['name']] = array(
                     'description'         => (!empty($group['description'])         ? $group['description']         : null),
-                    'data_classification' => (!empty($group['data_classification']) ? $group['data_classification'] : 'UNSET'),
+                    'data_classification' => (!empty($group['data_classification']) ? $group['data_classification'] : null),
                     'members'             => $members,
                 );
             }
@@ -228,7 +228,9 @@ EORULE;
                 '*category'            => $this->input->post('group_category'),
                 '*subcategory'         => $this->input->post('group_subcategory'),
                 '*description'         => $this->input->post('group_description'),
-                '*dataClassification'  => $this->input->post('group_data_classification'),
+                '*dataClassification'  => in_array('group_data_classification', array_keys($this->input->post()))
+                                          ? $this->input->post('group_data_classification')
+                                          : '', // Only research and intake groups will have a data classification parameter.
             ),
             array(
                 '*status',

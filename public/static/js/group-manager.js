@@ -25,6 +25,8 @@ $(function() {
         /// A subset of GROUP_PREFIXES_RE that cannot be selected.
         GROUP_PREFIXES_RESERVED_RE: /^(priv-|vault-)/,
 
+        GROUP_PREFIXES_WITH_DATA_CLASSIFICATION: ['research-', 'intake-'],
+
         /// The default prefix when adding a new group.
         GROUP_DEFAULT_PREFIX:       'research-',
 
@@ -78,6 +80,18 @@ $(function() {
             if (currentI + 1 < this.accessLevels.length)
                 next = this.accessLevels[currentI + 1];
             return next;
+        },
+
+        getPrefix: function(groupName) {
+            var matches = groupName.match(this.GROUP_PREFIXES_RE, '');
+            return matches
+                //? matches[1].slice(0, -1) // Chop off the '-' ?
+                ? matches[1]
+                : '';
+        },
+
+        prefixHasDataClassification: function(prefix) {
+            return this.GROUP_PREFIXES_WITH_DATA_CLASSIFICATION.indexOf(prefix) >= 0;
         },
 
         // Functions that check membership / access status of the
@@ -275,33 +289,33 @@ $(function() {
                             ? matches[1]
                             : '&nbsp;&nbsp;';
                     });
-                var prefix = function() {
-                    var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
-                    return matches
-                        ? matches[1].slice(0, -1)
-                        : '';
-                }();
+
+                var prefix = that.getPrefix(groupName);
+
                 $groupProperties.find('#f-group-update-name')
                     .val(groupName.replace(that.GROUP_PREFIXES_RE, ''))
                     .prop('readonly', true)
                     .attr('title', 'Group names cannot be changed')
-                    .attr('data-prefix', prefix + '-');
+                    .attr('data-prefix', prefix);
                 $groupProperties.find('#f-group-update-description')
                     .val(group.description)
                     .prop('readonly', !userCanManage);
 
-                var $dataclas = $groupProperties.find('#f-group-update-data-classification');
-
-                $dataclas.find('.option-unset').remove();
-                if (group.data_classification === 'UNSET') {
-                    $dataclas.append($('<option class="option-unset" value="UNSET">**Classification not yet provided**</option>'))
+                if (that.prefixHasDataClassification(prefix)) {
+                    $groupProperties.find('.data-classification').show();
+                    $('#f-group-update-data-classification')
+                        .select2('readonly', !userCanManage);
+                } else {
+                    $groupProperties.find('.data-classification').hide();
+                    $('#f-group-update-data-classification').select2('readonly', true);
                 }
-                $dataclas.val(group.data_classification)
-                        .select2('readonly', !userCanManage)
-                        .trigger('change');
-                $dataclas.find('.unspecified-option')
-                    // "unspecified" is only available to research groups.
-                    .attr('disabled', prefix === 'research' ? null : 'disabled');
+
+                if (group.data_classification === null)
+                    $('#f-group-update-data-classification')
+                        .val('unspecified').trigger('change');
+                else
+                    $('#f-group-update-data-classification')
+                        .val(group.data_classification).trigger('change');
 
                 $groupProperties.find('#f-group-update-submit')
                     .toggleClass('hidden', !userCanManage);
@@ -799,6 +813,11 @@ $(function() {
                 });
             }
 
+            // Avoid trying to set/update a data classification for groups that
+            // can't have one.
+            if (!this.prefixHasDataClassification(this.getPrefix(newProperties.name)))
+                delete postData.group_data_classification;
+
             $.ajax({
                 url:      $(el).attr('action'),
                 type:     'post',
@@ -1239,15 +1258,14 @@ $(function() {
                 var $prefixDiv = $('#f-group-create-prefix-div');
                 $prefixDiv.find('button .text').html(that.GROUP_DEFAULT_PREFIX + '&nbsp;');
 
+                $('#f-group-create-data-classification').val('unspecified').trigger('change');
+
                 // Set up the group prefix field thingy by "clicking" on the default option.
                 // (the event handler for that is below this one)
                 $('#f-group-create-prefix-div a[data-value="' + that.GROUP_DEFAULT_PREFIX + '"]').click();
 
                 $('#f-group-create-name')       .val('');
                 $('#f-group-create-description').val('');
-
-                // The data classification field is already reset by the
-                // 'click' event handler on the prefix field.
 
                 // The 'datamanager-' prefix option becomes selectable once the
                 // user selects a category that they are allowed to create the
@@ -1278,6 +1296,7 @@ $(function() {
             $('#modal-group-create #f-group-create-prefix-div a').on('click', function(e) {
                 // Select new group prefix.
                 var newPrefix = $(this).attr('data-value');
+                var oldPrefix = $('#f-group-create-name').attr('data-prefix');
 
                 $('#f-group-create-prefix-div button .text').html(newPrefix + '&nbsp;');
                 $('#f-group-create-name').attr('data-prefix', newPrefix);
@@ -1291,15 +1310,17 @@ $(function() {
                     $('#f-group-create-name').prop('readonly', false);
                 }
 
-                var $dataclas = $('#f-group-create-data-classification');
+                var  hadDataclas = that.prefixHasDataClassification(oldPrefix);
+                var haveDataclas = that.prefixHasDataClassification(newPrefix);
 
-                // Update data classification options.
-                if (newPrefix === 'research-') {
-                    $dataclas.find('.unspecified-option').attr('disabled', null);
-                    $dataclas.val('unspecified').trigger('change');
-                } else {
-                    $dataclas.val('sensitive').trigger('change');
-                    $dataclas.find('.unspecified-option').attr('disabled', 'disabled');
+                if (hadDataclas != haveDataclas) {
+                    if (haveDataclas) {
+                        $('#modal-group-create').find('.data-classification').show();
+                        $('#f-group-create-data-classification').val('unspecified').trigger('change');
+
+                    } else {
+                        $('#modal-group-create').find('.data-classification').hide();
+                    }
                 }
 
                 e.preventDefault();
