@@ -22,7 +22,7 @@ $(function() {
         /// view phtml must be edited.
         GROUP_PREFIXES_RE:          /^(grp-|priv-|intake-|vault-|research-|datamanager-)/,
 
-        /// A subset of GROUP_PREFIXES_RE that cannot be selected.
+        /// A subset of GROUP_PREFIXES_RE that cannot be selected for group creation, and that cannot be deleted.
         GROUP_PREFIXES_RESERVED_RE: /^(priv-|vault-)/,
 
         GROUP_PREFIXES_WITH_DATA_CLASSIFICATION: ['research-', 'intake-'],
@@ -177,20 +177,14 @@ $(function() {
          */
         canCreateDatamanagerGroup: function(categoryName) {
 
-            // Note: An existing datamanager group may not be visible to the
-            //          user, even if they have priv-category-add.
-            //          Is it user-friendly enough to allow them to attempt to
-            //          create the group, and fail with an error message if it
-            //          already exists?
-            //          For now I assume it is.
-
             return (// if the category name can legally be translated to a group name ...
-                    // XXX wip (regex taken from group name input element).
                        categoryName.match(/^([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$/)
-                    // ... and the datamanager group does not yet exist (but see the note above).
+                    // ... and the datamanager group does not yet exist ...
                     && !(('datamanager-' + categoryName) in this.groups)
-                    // ... and the user has priv-category-add or is rodsadmin.
-                    && (this.isMemberOfGroup('priv-category-add') || this.isRodsAdmin));
+                    // ... and the user is rodsadmin.
+                    && this.isRodsAdmin);
+
+            // (previously, priv-category-add was sufficient where we now require rodsadmin)
         },
 
         // }}}
@@ -260,8 +254,8 @@ $(function() {
             var $groupPanel = $('.panel.groups');
             $groupPanel.find('.delete-button').toggleClass(
                 'disabled',
-                // Why do I need to boolify this?
-                !!(!userCanManage || groupName.match(that.GROUP_PREFIXES_RESERVED_RE))
+                !!(!userCanManage || groupName.match(that.GROUP_PREFIXES_RESERVED_RE)
+                   || (groupName.match(/^datamanager-/) && !this.isRodsAdmin))
             );
 
             // The category of a datamanager group cannot be changed - the
