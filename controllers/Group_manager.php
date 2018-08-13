@@ -165,8 +165,9 @@ EORULE;
                 }
 
                 $hierarchy[$group['category']][$group['subcategory']][$group['name']] = array(
-                    'description' => (!empty($group['description']) ? $group['description'] : null),
-                    'members'     => $members,
+                    'description'         => (!empty($group['description'])         ? $group['description']         : null),
+                    'data_classification' => (!empty($group['data_classification']) ? $group['data_classification'] : null),
+                    'members'             => $members,
                 );
             }
         }
@@ -224,7 +225,7 @@ EORULE;
     public function groupCreate() {
         $ruleBody = <<<EORULE
 rule {
-	uuGroupAdd(*groupName, *category, *subcategory, *description, *statusInt, *message);
+	uuGroupAdd(*groupName, *category, *subcategory, *description, *dataClassification, *statusInt, *message);
 	*status = str(*statusInt);
 }
 EORULE;
@@ -232,10 +233,13 @@ EORULE;
             $this->rodsuser->getRodsAccount(),
             $ruleBody,
             array(
-                '*groupName'   => $this->input->post('group_name'),
-                '*category'    => $this->input->post('group_category'),
-                '*subcategory' => $this->input->post('group_subcategory'),
-                '*description' => $this->input->post('group_description'),
+                '*groupName'           => $this->input->post('group_name'),
+                '*category'            => $this->input->post('group_category'),
+                '*subcategory'         => $this->input->post('group_subcategory'),
+                '*description'         => $this->input->post('group_description'),
+                '*dataClassification'  => in_array('group_data_classification', array_keys($this->input->post()))
+                                          ? $this->input->post('group_data_classification')
+                                          : '', // Only research and intake groups will have a data classification parameter.
             ),
             array(
                 '*status',
@@ -254,7 +258,7 @@ EORULE;
 
     public function groupUpdate() {
         $toSet = array();
-        foreach (array('description', 'category', 'subcategory') as $property) {
+        foreach (array('description', 'data_classification', 'category', 'subcategory') as $property) {
             if (in_array('group_'.$property, array_keys($this->input->post())))
                 $toSet[$property] = $this->input->post('group_'.$property);
         }

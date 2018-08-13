@@ -25,6 +25,8 @@ $(function() {
         /// A subset of GROUP_PREFIXES_RE that cannot be selected.
         GROUP_PREFIXES_RESERVED_RE: /^(priv-|vault-)/,
 
+        GROUP_PREFIXES_WITH_DATA_CLASSIFICATION: ['research-', 'intake-'],
+
         /// The default prefix when adding a new group.
         GROUP_DEFAULT_PREFIX:       'research-',
 
@@ -78,6 +80,18 @@ $(function() {
             if (currentI + 1 < this.accessLevels.length)
                 next = this.accessLevels[currentI + 1];
             return next;
+        },
+
+        getPrefix: function(groupName) {
+            var matches = groupName.match(this.GROUP_PREFIXES_RE, '');
+            return matches
+                //? matches[1].slice(0, -1) // Chop off the '-' ?
+                ? matches[1]
+                : '';
+        },
+
+        prefixHasDataClassification: function(prefix) {
+            return this.GROUP_PREFIXES_WITH_DATA_CLASSIFICATION.indexOf(prefix) >= 0;
         },
 
         // Functions that check membership / access status of the
@@ -275,19 +289,34 @@ $(function() {
                             ? matches[1]
                             : '&nbsp;&nbsp;';
                     });
+
+                var prefix = that.getPrefix(groupName);
+
                 $groupProperties.find('#f-group-update-name')
                     .val(groupName.replace(that.GROUP_PREFIXES_RE, ''))
                     .prop('readonly', true)
                     .attr('title', 'Group names cannot be changed')
-                    .attr('data-prefix', function() {
-                        var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
-                        return matches
-                            ? matches[1]
-                            : '';
-                    });
+                    .attr('data-prefix', prefix);
                 $groupProperties.find('#f-group-update-description')
                     .val(group.description)
                     .prop('readonly', !userCanManage);
+
+                if (that.prefixHasDataClassification(prefix)) {
+                    $groupProperties.find('.data-classification').show();
+                    $('#f-group-update-data-classification')
+                        .select2('readonly', !userCanManage);
+                } else {
+                    $groupProperties.find('.data-classification').hide();
+                    $('#f-group-update-data-classification').select2('readonly', true);
+                }
+
+                if (group.data_classification === null)
+                    $('#f-group-update-data-classification')
+                        .val('unspecified').trigger('change');
+                else
+                    $('#f-group-update-data-classification')
+                        .val(group.data_classification).trigger('change');
+
                 $groupProperties.find('#f-group-update-submit')
                     .toggleClass('hidden', !userCanManage);
             })();
@@ -739,11 +768,12 @@ $(function() {
             }
 
             var newProperties = {
-                name:          $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
-                             + $(el).find('#f-group-'+action+'-name'     ).val(),
-                description: $(el).find('#f-group-'+action+'-description').val(),
-                category:    $(el).find('#f-group-'+action+'-category'   ).val(),
-                subcategory: $(el).find('#f-group-'+action+'-subcategory').val(),
+                name:                $(el).find('#f-group-'+action+'-name'     ).attr('data-prefix')
+                                   + $(el).find('#f-group-'+action+'-name'     ).val(),
+                description:         $(el).find('#f-group-'+action+'-description').val(),
+                data_classification: $(el).find('#f-group-'+action+'-data-classification').val(),
+                category:            $(el).find('#f-group-'+action+'-category'   ).val(),
+                subcategory:         $(el).find('#f-group-'+action+'-subcategory').val(),
             };
 
             if (newProperties.category === '' || newProperties.subcategory === '') {
@@ -764,20 +794,29 @@ $(function() {
             }
 
             var postData = {
-                group_name:        newProperties.name,
-                group_description: newProperties.description,
-                group_category:    newProperties.category,
-                group_subcategory: newProperties.subcategory,
+                group_name:                newProperties.name,
+                group_description:         newProperties.description,
+                group_data_classification: newProperties.data_classification,
+                group_category:            newProperties.category,
+                group_subcategory:         newProperties.subcategory,
             };
 
             if (action === 'update') {
                 var selectedGroup = this.groups[$($('#group-list .group.active')[0]).attr('data-name')];
-                ['description', 'category', 'subcategory'].forEach(function(item) {
+                ['description',
+                 'data_classification',
+                 'category',
+                 'subcategory'].forEach(function(item) {
                     // Filter out fields that have not changed.
                     if (selectedGroup[item] === newProperties[item])
                         delete postData['group_' + item];
                 });
             }
+
+            // Avoid trying to set/update a data classification for groups that
+            // can't have one.
+            if (!this.prefixHasDataClassification(this.getPrefix(newProperties.name)))
+                delete postData.group_data_classification;
 
             $.ajax({
                 url:      $(el).attr('action'),
@@ -1095,6 +1134,7 @@ $(function() {
          *         'SUBCATEGORY_NAME': {
          *           'GROUP_NAME': {
          *             'description': 'GROUP_DESCRIPTION',
+         *             'data-classification': 'GROUP_DATA_CLASSIFICATION',
          *             'members': {
          *               'USER_NAME': {
          *                 'access': (reader | normal | manager)
@@ -1125,6 +1165,7 @@ $(function() {
                                 subcategory: subcategoryName,
                                 name:        groupName,
                                 description: hier[categoryName][subcategoryName][groupName].description,
+                                data_classification: hier[categoryName][subcategoryName][groupName].data_classification,
                                 members:     hier[categoryName][subcategoryName][groupName].members
                             };
                 return groups;
@@ -1217,6 +1258,8 @@ $(function() {
                 var $prefixDiv = $('#f-group-create-prefix-div');
                 $prefixDiv.find('button .text').html(that.GROUP_DEFAULT_PREFIX + '&nbsp;');
 
+                $('#f-group-create-data-classification').val('unspecified').trigger('change');
+
                 // Set up the group prefix field thingy by "clicking" on the default option.
                 // (the event handler for that is below this one)
                 $('#f-group-create-prefix-div a[data-value="' + that.GROUP_DEFAULT_PREFIX + '"]').click();
@@ -1253,6 +1296,7 @@ $(function() {
             $('#modal-group-create #f-group-create-prefix-div a').on('click', function(e) {
                 // Select new group prefix.
                 var newPrefix = $(this).attr('data-value');
+                var oldPrefix = $('#f-group-create-name').attr('data-prefix');
 
                 $('#f-group-create-prefix-div button .text').html(newPrefix + '&nbsp;');
                 $('#f-group-create-name').attr('data-prefix', newPrefix);
@@ -1264,6 +1308,19 @@ $(function() {
                     $('#f-group-create-name').prop('readonly', true);
                 } else {
                     $('#f-group-create-name').prop('readonly', false);
+                }
+
+                var  hadDataclas = that.prefixHasDataClassification(oldPrefix);
+                var haveDataclas = that.prefixHasDataClassification(newPrefix);
+
+                if (hadDataclas != haveDataclas) {
+                    if (haveDataclas) {
+                        $('#modal-group-create').find('.data-classification').show();
+                        $('#f-group-create-data-classification').val('unspecified').trigger('change');
+
+                    } else {
+                        $('#modal-group-create').find('.data-classification').hide();
+                    }
                 }
 
                 e.preventDefault();
@@ -1365,6 +1422,7 @@ $(function() {
             // }}}
 
             this.selectifyInputs('.selectify-category, .selectify-subcategory, .selectify-user-name');
+            $('.selectify-data-classification').select2();
 
             if (this.isMemberOfGroup('priv-group-add') || this.isRodsAdmin) {
                 var $groupPanel = $('.panel.groups');

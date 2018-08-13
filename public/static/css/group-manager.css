@@ -23,6 +23,10 @@ i.form-control-feedback.glyphicon {
 	color: #ddd;
 }
 
+.selectify-data-classification {
+	width: 100%;
+}
+
 .panel > .list-group .list-group .list-group-item {
 	border-top:    1px solid #ddd;
 	border-bottom: 1px solid #ddd;
