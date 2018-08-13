@@ -165,7 +165,7 @@ EORULE;
                 }
 
                 $hierarchy[$group['category']][$group['subcategory']][$group['name']] = array(
-                    'description'         => (!empty($group['description'])         ? $group['description']         : null),
+                    'description'         => (!empty($group['description'])         ? $group['description']         : ''),
                     'data_classification' => (!empty($group['data_classification']) ? $group['data_classification'] : null),
                     'members'             => $members,
                 );
