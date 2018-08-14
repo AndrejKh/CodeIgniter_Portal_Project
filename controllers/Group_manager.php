@@ -66,54 +66,34 @@ EORULE;
     }
 
     protected function _getCategories() {
+
         if (isset($this->_categories)) {
             return $this->_categories;
         } else {
-            $ruleBody = <<<EORULE
-rule {
-	uuGroupGetCategories(*categoriesList);
-	uuJoin(',', *categoriesList, *categories);
-}
-EORULE;
             $rule = new ProdsRule(
                 $this->rodsuser->getRodsAccount(),
-                $ruleBody,
+                'rule { uuGroupGetCategoriesJson(); }',
                 array(),
-                array(
-                    '*categories'
-                )
+                array('ruleExecOut')
             );
             $result = $rule->execute();
-            return $this->_categories = explodeProperly(',', $result['*categories']);
+            return $this->_categories = json_decode($result['ruleExecOut']);
         }
     }
 
     protected function _getSubcategories($category) {
-        $categories = $this->_getCategories();
-        if (!in_array($category, $categories))
-            return array();
 
         if (isset($this->_subcategories[$category])) {
             return $this->_subcategories[$category];
         } else {
-            $ruleBody = <<<EORULE
-rule {
-	uuGroupGetSubcategories(*category, *subcategoriesList);
-	uuJoin(',', *subcategoriesList, *subcategories);
-}
-EORULE;
             $rule = new ProdsRule(
                 $this->rodsuser->getRodsAccount(),
-                $ruleBody,
-                array(
-                    '*category' => $category
-                ),
-                array(
-                    '*subcategories'
-                )
+                'rule { uuGroupGetSubcategoriesJson(*category); }',
+                array('*category' => $category),
+                array('ruleExecOut')
             );
             $result = $rule->execute();
-            return $this->_subcategories[$category] = explodeProperly(',', $result['*subcategories']);
+            return $this->_subcategories[$category] = json_decode($result['ruleExecOut']);
         }
     }
 
