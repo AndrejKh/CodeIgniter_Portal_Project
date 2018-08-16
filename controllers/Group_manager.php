@@ -9,7 +9,7 @@
  * Parameters are the same as for explodeProperly().
  */
 function explodeProperly($delim, $str) {
-    return empty($str) ? array() : explode($delim, $str);
+    return (!isset($str) || !strlen($str)) ? array() : explode($delim, $str);
 }
 
 /**
@@ -125,7 +125,9 @@ EORULE;
         foreach ($groups as $group) {
             $group = (array) $group;
             // Check YoDa (sub)category
-            if (!empty($group['category']) && !empty($group['subcategory'])) {
+            if (   isset($group['category'])    && strlen($group['category'])
+                && isset($group['subcategory']) && strlen($group['subcategory'])) {
+
                 // Group members
                 $members = array();
 
@@ -145,8 +147,10 @@ EORULE;
                 }
 
                 $hierarchy[$group['category']][$group['subcategory']][$group['name']] = array(
-                    'description'         => (!empty($group['description'])         ? $group['description']         : ''),
-                    'data_classification' => (!empty($group['data_classification']) ? $group['data_classification'] : null),
+                    'description'         => ((isset($group['description'])         && strlen($group['description']))
+                                               ? $group['description']         : ''),
+                    'data_classification' => ((isset($group['data_classification']) && strlen($group['data_classification']))
+                                               ? $group['data_classification'] : null),
                     'members'             => $members,
                 );
             }
@@ -164,7 +168,7 @@ EORULE;
             // WTF PHP: json_encode randomly turns an array into a { "1": ... } object.
                 array_values(
                     array_filter($this->_getCategories(), function($val) use($query) {
-                        return !(!empty($query) && strstr($val, $query) === FALSE);
+                        return !(isset($query) && strlen($query) && strstr($val, $query) === FALSE);
                     })
                 )
             ));
@@ -181,7 +185,7 @@ EORULE;
                 ->set_output(json_encode(
                     array_values(
                         array_filter($this->_getSubcategories($category), function($val) use($query) {
-                            return !(!empty($query) && strstr($val, $query) === FALSE);
+                            return !(isset($query) && strlen($query) && strstr($val, $query) === FALSE);
                         })
                     )
                 ));
