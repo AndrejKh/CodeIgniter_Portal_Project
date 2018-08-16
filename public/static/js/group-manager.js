@@ -590,6 +590,14 @@ $(function() {
                                         disabled: true,
                                     });
                             });
+
+                            results.sort(function(a, b) {
+                                return (a.id === b.id  ?  0 :
+                                        a.id === query ? -1 :
+                                        b.id === query ?  1 :
+                                        a.id >=  b.id  ?  1 : -1);
+                            });
+
                             if (
                                   !inputMatches
                                 && query.length
@@ -668,6 +676,14 @@ $(function() {
                                 if (query === subcategory)
                                     inputMatches = true;
                             });
+
+                            results.sort(function(a, b) {
+                                return (a.id === b.id  ?  0 :
+                                        a.id === query ? -1 :
+                                        b.id === query ?  1 :
+                                        a.id >=  b.id  ?  1 : -1);
+                            });
+
                             if (!inputMatches && query.length)
                                 results.push({
                                     id:   query,
