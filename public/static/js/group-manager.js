@@ -30,6 +30,8 @@ $(function() {
         /// The default prefix when adding a new group.
         GROUP_DEFAULT_PREFIX:       'research-',
 
+        unloading: false, ///< Set to true when a navigation action is detected. Used for better error reporting.
+
         groupHierarchy: null, ///< A group hierarchy object. See YodaPortal.groupManager.load().
         groups:         null, ///< A list of group objects with member information. See YodaPortal.groupManager.load().
 
@@ -194,6 +196,32 @@ $(function() {
         },
 
         // }}}
+
+        /**
+         * \brief Execute a function if an AJAX request was not aborted.
+         *
+         * This is used to inhibit error reporting when the cause of the error
+         * was that the user aborted a request.
+         *
+         * \param result the request result object
+         * \param f      the function to call
+         */
+        ifRequestNotAborted: function(result, f) {
+            if (!this.unloading) {
+                // Aborted requests are apparently hard to detect reliably.
+                // The closest we can get is a detection of an abort caused by
+                // navigation (e.g. refreshing the page):
+                // https://stackoverflow.com/a/15141116
+                //
+                // Checking result.status is not sufficient, because we
+                // cannot distinguish between aborted requests and network
+                // failures.
+                // The result.statusText can not be used because its behavior
+                // differs between browsers(!), e.g. Firefox will set it to
+                // 'error' either way.
+                f();
+            }
+        },
 
         /**
          * \brief Unfold the category belonging to the given group in the group list.
@@ -813,6 +841,8 @@ $(function() {
                 });
             }
 
+            var that = this;
+
             // Avoid trying to set/update a data classification for groups that
             // can't have one.
             if (!this.prefixHasDataClassification(this.getPrefix(newProperties.name)))
@@ -857,8 +887,11 @@ $(function() {
                             + "Please contact a Yoda administrator"
                         );
                 }
-            }).fail(function() {
-                alert("Error: Could not create group due to an internal error.\nPlease contact a Yoda administrator");
+            }).fail(function(result) {
+                that.ifRequestNotAborted(result, function() {
+                    alert("Error: Could not "+action+" group due to an internal error.\nPlease contact a Yoda administrator");
+                    resetSubmitButton();
+                });
             });
         },
 
@@ -912,8 +945,10 @@ $(function() {
                             + "Please contact a Yoda administrator"
                         );
                 }
-            }).fail(function() {
-                alert("Error: Could not remove the selected group due to an internal error.\nPlease contact a Yoda administrator");
+            }).fail(function(result) {
+                that.ifRequestNotAborted(result, function() {
+                    alert("Error: Could not remove the selected group due to an internal error.\nPlease contact a Yoda administrator");
+                });
             });
         },
 
@@ -982,8 +1017,11 @@ $(function() {
                 }
                 $(el).find('input[type="submit"]').removeClass('disabled').val('Add');
 
-            }).fail(function() {
-                alert("Error: Could not add a user due to an internal error.\nPlease contact a Yoda administrator");
+            }).fail(function(result) {
+                that.ifRequestNotAborted(result, function() {
+                    alert("Error: Could not add a user due to an internal error.\nPlease contact a Yoda administrator");
+                    $(el).find('input[type="submit"]').removeClass('disabled').val('Add');
+                });
             });
         },
 
@@ -1060,8 +1098,10 @@ $(function() {
                             + "Please contact a Yoda administrator"
                         );
                 }
-            }).fail(function() {
-                alert("Error: Could not change the role for the selected user due to an internal error.\nPlease contact a Yoda administrator");
+            }).fail(function(result) {
+                that.ifRequestNotAborted(result, function() {
+                    alert("Error: Could not change the role for the selected user due to an internal error.\nPlease contact a Yoda administrator");
+                });
             });
         },
 
@@ -1119,8 +1159,10 @@ $(function() {
                             + "Please contact a Yoda administrator"
                         );
                 }
-            }).fail(function() {
-                alert("Error: Could not remove the selected user from the group due to an internal error.\nPlease contact a Yoda administrator");
+            }).fail(function(result) {
+                that.ifRequestNotAborted(result, function() {
+                    alert("Error: Could not remove the selected user from the group due to an internal error.\nPlease contact a Yoda administrator");
+                });
             });
         },
 
@@ -1464,6 +1506,10 @@ $(function() {
                 if ($categoryEls.length === 1)
                     this.unfoldToGroup($categoryEls.find('.group').attr('data-name'));
             }
+
+            $(window).on('beforeunload', function() {
+                that.unloading = true;
+            });
         },
 
     });
