@@ -408,11 +408,11 @@ EORULE;
     public function index() {
         $viewParams = array(
             'styleIncludes' => array(
-                'lib/select2/css/select2.min.css',
+                'lib/select2/select2.css',
                 'css/group-manager.css'
             ),
             'scriptIncludes' => array(
-                'lib/select2/js/select2.min.js',
+                'lib/select2/select2.min.js',
                 'js/group-manager.js'
             ),
             'activeModule'   => 'group-manager',
