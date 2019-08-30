@@ -409,6 +409,7 @@ EORULE;
         $viewParams = array(
             'styleIncludes' => array(
                 'lib/select2/select2.css',
+                'lib/select2/select2-bootstrap.min.css',
                 'css/group-manager.css'
             ),
             'scriptIncludes' => array(
