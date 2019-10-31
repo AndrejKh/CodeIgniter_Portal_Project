@@ -31,7 +31,7 @@ class Group_Manager extends MY_Controller {
         if ($this->rodsuser->getUserInfo()['type'] == 'rodsadmin') {
             $rulebody = <<<EORULE
 rule {
-        uuGetGroupData();
+        rule_uu_group_data();
 }
 EORULE;
             $rule = new ProdsRule(
@@ -45,7 +45,7 @@ EORULE;
 	} else {
             $rulebody = <<<EORULE
 rule {
-        uuGetUserGroupData(*user, *zone);
+        rule_uu_group_data_filtered(*user, *zone);
 }
 EORULE;
             $rule = new ProdsRule(
@@ -72,7 +72,7 @@ EORULE;
         } else {
             $rule = new ProdsRule(
                 $this->rodsuser->getRodsAccount(),
-                'rule { uuGroupGetCategoriesJson(); }',
+                'rule { rule_uu_group_categories(); }',
                 array(),
                 array('ruleExecOut')
             );
@@ -88,7 +88,7 @@ EORULE;
         } else {
             $rule = new ProdsRule(
                 $this->rodsuser->getRodsAccount(),
-                'rule { uuGroupGetSubcategoriesJson(*category); }',
+                'rule { rule_uu_group_subcategories(*category); }',
                 array('*category' => $category),
                 array('ruleExecOut')
             );
