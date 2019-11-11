@@ -19,82 +19,25 @@ function explodeProperly($delim, $str) {
  */
 class Group_Manager extends MY_Controller {
 
-    protected $_groups;        /// `[ group... ]`.
-    protected $_categories;    /// `[ category... ]`.
-    protected $_subcategories; /// `category => [ subcategory... ]...`.
-
     protected function _getGroupData() {
-        if (isset($this->_groups)) {
-            return $this->_groups;
+        if ($this->rodsuser->getUserInfo()['type'] === 'rodsadmin') {
+            $result = $this->api->call('uu_group_data');
+        } else {
+            $result = $this->api->call('uu_group_data_filtered',
+                                       ['user_name' => $this->rodsuser->getUserInfo()['name'],
+                                        'zone_name' => $this->rodsuser->getUserInfo()['zone']]);
         }
-
-        if ($this->rodsuser->getUserInfo()['type'] == 'rodsadmin') {
-            $rulebody = <<<EORULE
-rule {
-        rule_uu_group_data();
-}
-EORULE;
-            $rule = new ProdsRule(
-                $this->rodsuser->getRodsAccount(),
-                $rulebody,
-                array(),
-                array(
-                    'ruleExecOut'
-                )
-            );
-	} else {
-            $rulebody = <<<EORULE
-rule {
-        rule_uu_group_data_filtered(*user, *zone);
-}
-EORULE;
-            $rule = new ProdsRule(
-                $this->rodsuser->getRodsAccount(),
-                $rulebody,
-                array(
-                    '*user' => $this->rodsuser->getUserInfo()['name'],
-                    '*zone' => $this->rodsuser->getUserInfo()['zone']
-                ),
-                array(
-                    'ruleExecOut'
-                )
-            );
-	}
-
-        $result = $rule->execute();
-        return json_decode($result['ruleExecOut']);
+        return $result['data'];
     }
 
     protected function _getCategories() {
 
-        if (isset($this->_categories)) {
-            return $this->_categories;
-        } else {
-            $rule = new ProdsRule(
-                $this->rodsuser->getRodsAccount(),
-                'rule { rule_uu_group_categories(); }',
-                array(),
-                array('ruleExecOut')
-            );
-            $result = $rule->execute();
-            return $this->_categories = json_decode($result['ruleExecOut']);
-        }
+        return $this->api->call('uu_group_categories')['data'];
     }
 
     protected function _getSubcategories($category) {
 
-        if (isset($this->_subcategories[$category])) {
-            return $this->_subcategories[$category];
-        } else {
-            $rule = new ProdsRule(
-                $this->rodsuser->getRodsAccount(),
-                'rule { rule_uu_group_subcategories(*category); }',
-                array('*category' => $category),
-                array('ruleExecOut')
-            );
-            $result = $rule->execute();
-            return $this->_subcategories[$category] = json_decode($result['ruleExecOut']);
-        }
+        return $this->api->call('uu_group_subcategories', ['category' => $category])['data'];
     }
 
     protected function _findUsers($query) {
@@ -427,5 +370,7 @@ EORULE;
 
     public function __construct() {
         parent::__construct();
+
+        $this->load->library('api');
     }
 }
