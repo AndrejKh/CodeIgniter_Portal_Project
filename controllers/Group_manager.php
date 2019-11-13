@@ -27,17 +27,17 @@ class Group_Manager extends MY_Controller {
                                        ['user_name' => $this->rodsuser->getUserInfo()['name'],
                                         'zone_name' => $this->rodsuser->getUserInfo()['zone']]);
         }
-        return $result['data'];
+        return $result->data;
     }
 
     protected function _getCategories() {
 
-        return $this->api->call('uu_group_categories')['data'];
+        return $this->api->call('uu_group_categories')->data;
     }
 
     protected function _getSubcategories($category) {
 
-        return $this->api->call('uu_group_subcategories', ['category' => $category])['data'];
+        return $this->api->call('uu_group_subcategories', ['category' => $category])->data;
     }
 
     protected function _findUsers($query) {
