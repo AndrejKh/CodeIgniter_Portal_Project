@@ -9,7 +9,7 @@
 "use strict";
 
 $(function() {
-    YodaPortal.extend('groupManager', {
+    Yoda.groupManager = {
 
         /**
          * \brief If the amount of visible groups is higher than or equal to this value,
@@ -32,10 +32,10 @@ $(function() {
 
         unloading: false, ///< Set to true when a navigation action is detected. Used for better error reporting.
 
-        groupHierarchy: null, ///< A group hierarchy object. See YodaPortal.groupManager.load().
-        groups:         null, ///< A list of group objects with member information. See YodaPortal.groupManager.load().
+        groupHierarchy: null, ///< A group hierarchy object. See Yoda.groupManager.load().
+        groups:         null, ///< A list of group objects with member information. See Yoda.groupManager.load().
 
-        isRodsAdmin: false, // This will be set in YodaPortal.groupManager.load().
+        isRodsAdmin: false, // This will be set in Yoda.groupManager.load().
 
         zone: null,
         userNameFull: null, ///< The username, including the zone name.
@@ -225,7 +225,7 @@ $(function() {
         unfoldToGroup: function(groupName) {
             var $groupList = $('#group-list');
 
-            var $group = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
+            var $group = $groupList.find('.group[data-name="' + Yoda.escapeQuotes(groupName) + '"]');
 
             $group.parents('.category').children('a.name').removeClass('collapsed');
             $group.parents('.category').children('.category-ul').removeClass('hidden');
@@ -263,7 +263,7 @@ $(function() {
             var userCanManage = this.canManageGroup(groupName);
 
             var $groupList = $('#group-list');
-            var $group     = $groupList.find('.group[data-name="' + this.parent.escapeQuotes(groupName) + '"]');
+            var $group     = $groupList.find('.group[data-name="' + Yoda.escapeQuotes(groupName) + '"]');
             var $oldGroup  = $groupList.find('.active');
 
             if ($group.is($oldGroup))
@@ -275,7 +275,7 @@ $(function() {
 
             $oldGroup.removeClass('active');
             $group.addClass('active');
-            YodaPortal.storage.session.set('selected-group', groupName);
+            Yoda.storage.session.set('selected-group', groupName);
 
             var that = this;
 
@@ -395,7 +395,7 @@ $(function() {
                                + '" title="'
                                + that.accessNames[user.access]
                                + '"></i> '
-                               + that.parent.escapeEntities(displayName));
+                               + Yoda.escapeEntities(displayName));
 
                     $userList.append($user);
                 });
@@ -452,7 +452,7 @@ $(function() {
             $userPanel.find('.panel-heading').css({ borderBottom: ''               });
             $userPanel.find('.panel-footer').css( { borderTop:    '1px solid #ddd' });
 
-            YodaPortal.storage.session.remove('selected-group');
+            Yoda.storage.session.remove('selected-group');
         },
 
         /**
@@ -463,7 +463,7 @@ $(function() {
         selectUser: function(userName) {
             var $userList = $('#user-list');
 
-            var $user    = $userList.find('.user[data-name="' + this.parent.escapeQuotes(userName) + '"]');
+            var $user    = $userList.find('.user[data-name="' + Yoda.escapeQuotes(userName) + '"]');
             var $oldUser = $userList.find('.active');
 
             if ($user.is($oldUser))
@@ -548,7 +548,7 @@ $(function() {
                 $el.select2({
                     ajax: {
                         quietMillis: 200,
-                        url:      YodaPortal.baseUrl + 'group-manager/get-categories',
+                        url:      Yoda.baseUrl + 'group-manager/get-categories',
                         type:     'get',
                         dataType: 'json',
                         data: function (term, page) {
@@ -648,7 +648,7 @@ $(function() {
                 $el.select2({
                     ajax: {
                         quietMillis: 200,
-                        url:      YodaPortal.baseUrl + 'group-manager/get-subcategories',
+                        url:      Yoda.baseUrl + 'group-manager/get-subcategories',
                         type:     'get',
                         dataType: 'json',
                         data: function (term, page) {
@@ -716,7 +716,7 @@ $(function() {
                     minimumInputLength: 3,
                     ajax: {
                         quietMillis: 400,
-                        url:      YodaPortal.baseUrl + 'group-manager/get-users',
+                        url:      Yoda.baseUrl + 'group-manager/get-users',
                         type:     'get',
                         dataType: 'json',
                         data: function (term, page) {
@@ -868,11 +868,11 @@ $(function() {
                     console.log('Group '+action+' completed with status ' + result.status);
                 if ('status' in result && result.status === 0) {
                     // OK! Make sure the newly added group is selected after reloading the page.
-                    YodaPortal.storage.session.set('selected-group', postData.group_name);
+                    Yoda.storage.session.set('selected-group', postData.group_name);
 
                     // And give the user some feedback.
-                    YodaPortal.storage.session.set('messages',
-                        YodaPortal.storage.session.get('messages', []).concat({
+                    Yoda.storage.session.set('messages',
+                        Yoda.storage.session.get('messages', []).concat({
                             type:    'success',
                             message: action === 'create'
                                      ? 'Created group ' + postData.group_name + '.'
@@ -930,8 +930,8 @@ $(function() {
                     console.log('Group remove completed with status ' + result.status);
                 if ('status' in result && result.status === 0) {
                     // Give the user some feedback.
-                    YodaPortal.storage.session.set('messages',
-                        YodaPortal.storage.session.get('messages', []).concat({
+                    Yoda.storage.session.set('messages',
+                        Yoda.storage.session.get('messages', []).concat({
                             type:    'success',
                             message: 'Removed group ' + groupName + '.'
                         })
@@ -945,7 +945,7 @@ $(function() {
                     // Something went wrong.
 
                     // Re-enable group list entry.
-                    $('#group-list .group.delete-pending[data-name="' + that.parent.escapeQuotes(groupName) + '"]').removeClass('delete-pending disabled').attr('title', '');
+                    $('#group-list .group.delete-pending[data-name="' + Yoda.escapeQuotes(groupName) + '"]').removeClass('delete-pending disabled').attr('title', '');
 
                     if ('message' in result)
                         alert(result.message);
@@ -1092,11 +1092,11 @@ $(function() {
                     that.selectGroup(groupName);
 
                     // Give a visual hint that the user was updated.
-                    $('#user-list .user[data-name="' + that.parent.escapeQuotes(userName) + '"]').addClass('blink-once');
+                    $('#user-list .user[data-name="' + Yoda.escapeQuotes(userName) + '"]').addClass('blink-once');
                 } else {
                     // Something went wrong. :(
 
-                    $('#user-list .user.update-pending[data-name="' + that.parent.escapeQuotes(userName) + '"]')
+                    $('#user-list .user.update-pending[data-name="' + Yoda.escapeQuotes(userName) + '"]')
                         .removeClass('update-pending disabled')
                         .attr('title', '');
 
@@ -1124,7 +1124,7 @@ $(function() {
         onClickUserDelete: function(el) {
             if ($('#f-user-delete-no-confirm').prop('checked')) {
                 $('#f-user-delete-no-confirm').prop('checked', false);
-                YodaPortal.storage.session.set('confirm-user-delete', false);
+                Yoda.storage.session.set('confirm-user-delete', false);
                 this.removeUserDeleteConfirmationModal();
             }
 
@@ -1159,7 +1159,7 @@ $(function() {
                     // Something went wrong. :(
 
                     // Re-enable user list entry.
-                    $('#user-list .user.delete-pending[data-name="' + that.parent.escapeQuotes(userName) + '"]').removeClass('delete-pending disabled').attr('title', '');
+                    $('#user-list .user.delete-pending[data-name="' + Yoda.escapeQuotes(userName) + '"]').removeClass('delete-pending disabled').attr('title', '');
 
                     if ('message' in result)
                         alert(result.message);
@@ -1205,7 +1205,7 @@ $(function() {
             this.groupHierarchy = groupHierarchy;
             this.isRodsAdmin    = userType == 'rodsadmin';
             this.zone           = userZone;
-            this.userNameFull   = YodaPortal.user.username + '#' + userZone;
+            this.userNameFull   = Yoda.user.username + '#' + userZone;
             this.groups         = (function(hier) {
                 // Create a flat group map based on the hierarchy object.
                 var groups = { };
@@ -1233,8 +1233,8 @@ $(function() {
                 // Append a CSRF token to all AJAX POST requests.
                 if (settings.type === 'POST' && settings.data.length)
                     settings.data
-                        += '&' + encodeURIComponent(YodaPortal.csrf.tokenName)
-                         + '=' + encodeURIComponent(YodaPortal.csrf.tokenValue);
+                        += '&' + encodeURIComponent(Yoda.csrf.tokenName)
+                         + '=' + encodeURIComponent(Yoda.csrf.tokenValue);
             });
 
             // }}}
@@ -1283,7 +1283,7 @@ $(function() {
                 var $collapsibles = $categories.children('ul');
                 var $groups       = $groupList.find('.group');
 
-                var quotedVal = YodaPortal.escapeQuotes($(this).val());
+                var quotedVal = Yoda.escapeQuotes($(this).val());
 
                 $collapsibles.css('transition', 'none');
                 //$collapsibles.collapse('hide');
@@ -1454,7 +1454,7 @@ $(function() {
                 $(this).find('.user').text(userName.split('#')[0]);
             });
 
-            if (!YodaPortal.storage.session.get('confirm-user-delete', true))
+            if (!Yoda.storage.session.get('confirm-user-delete', true))
                 this.removeUserDeleteConfirmationModal();
 
             // User list search.
@@ -1462,7 +1462,7 @@ $(function() {
                 var $users  = $('.panel.users .user');
 
                 if ($(this).val().length) {
-                    var quotedVal = YodaPortal.escapeQuotes($(this).val());
+                    var quotedVal = Yoda.escapeQuotes($(this).val());
                     $users.filter('.filtered[data-name*="' + quotedVal + '"]').removeClass('filtered');
                     $users.filter(':not(.filtered):not([data-name*="' + quotedVal + '"])').addClass('filtered');
                 } else {
@@ -1484,21 +1484,21 @@ $(function() {
             // Indicate which groups are managed by this user.
             for (var groupName in this.groups) {
                 if (this.isManagerOfGroup(groupName)) {
-                    $('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
+                    $('#group-list .group[data-name="' + Yoda.escapeQuotes(groupName) + '"]').append(
                         '<span class="pull-right glyphicon glyphicon-tower" title="You manage this group"></span>'
                     );
                 } else if (!this.isMemberOfGroup(groupName) && this.isRodsAdmin) {
-                    $('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
+                    $('#group-list .group[data-name="' + Yoda.escapeQuotes(groupName) + '"]').append(
                         '<span class="pull-right glyphicon glyphicon-wrench" title="You are not a member of this group, but you can manage it as an iRODS administrator."></span>'
                     );
                 } else if (this.groups[groupName].members[this.userNameFull].access == 'reader') {
-                    $('#group-list .group[data-name="' + this.parent.escapeQuotes(groupName) + '"]').append(
+                    $('#group-list .group[data-name="' + Yoda.escapeQuotes(groupName) + '"]').append(
                         '<span class="pull-right glyphicon glyphicon-eye-open" title="You have read access to this group"></span>'
                     );
                 }
             }
 
-            var selectedGroup = YodaPortal.storage.session.get('selected-group');
+            var selectedGroup = Yoda.storage.session.get('selected-group');
             if (selectedGroup !== null && selectedGroup in this.groups) {
                 // Automatically select the last selected group within this session (bound to this tab).
                 this.selectGroup(selectedGroup);
@@ -1522,5 +1522,5 @@ $(function() {
             });
         },
 
-    });
+    };
 });
