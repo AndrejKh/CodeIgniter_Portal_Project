@@ -10,9 +10,9 @@ $(function() {
 
 <div class="row">
 	<div class="col-md-5">
-		<div class="card  groups">
-			<div class="card-header clearfix">
-				<h3 class="card-header float-xs-left">Yoda groups</h3>
+		<div class="card groups">
+			<div class="card-header">
+				Yoda groups
 				<div class="input-group-sm has-feedback float-xs-right hidden">
 					<!-- TODO: Search groups. -->
 					<input class="form-control form-control-sm" id="group-list-search" type="text" placeholder="Search groups" />
@@ -70,7 +70,7 @@ $(function() {
 ?>
 
 			</div>
-			<div class="card-footer clearfix">
+			<div class="card-footer">
 				<div class="input-group-sm float-xs-left">
 					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/group-delete')?>" data-toggle="modal" data-target="#modal-group-delete">Remove group</a>
 				</div>
@@ -82,10 +82,8 @@ $(function() {
 	</div>
 	<div class="col-md-7">
 		<div class="card  properties">
-			<div class="card-header">
-				<h3 class="card-header">Group properties</h3>
-			</div>
-			<div class="card-block" id="group-properties">
+			<div class="card-header">Group properties</div>
+			<div class="card-body" id="group-properties">
 				<p class="placeholder-text">
 					Please select a group.
 				</p>
@@ -139,15 +137,14 @@ $(function() {
 				</form>
 			</div>
 		</div>
-		<div class="card  users">
-			<div class="card-header clearfix">
-				<h3 class="card-header float-xs-left">Group members</h3>
+		<div class="card users">
+			<div class="card-header">Group members</h3>
 				<div class="input-group-sm has-feedback float-xs-right">
 					<input class="form-control form-control-sm" id="user-list-search" type="text" placeholder="Search users" />
 					<i class="glyphicon glyphicon-search form-control-feedback"></i>
 				</div>
 			</div>
-			<div class="card-block">
+			<div class="card-body">
 				<p class="placeholder-text">
 					Please select a group.
 				</p>
@@ -168,7 +165,7 @@ $(function() {
 					</form>
 				</div>
 			</div>
-			<div class="card-footer clearfix" style="border-top: 1px solid #ddd;">
+			<div class="card-footer">
 				<div class="input-group-sm float-xs-left">
 					Change role:
                     <a class="btn btn-sm btn-primary disabled update-button promote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Promote the selected user">&uarr;<i class="glyphicon glyphicon-tower"></i></a>
