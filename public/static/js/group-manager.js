@@ -175,7 +175,7 @@ $(function() {
          *
          * \param categoryName
          *
-         * \return 
+         * \return
          */
         canCreateDatamanagerGroup: function(categoryName) {
 
@@ -244,7 +244,7 @@ $(function() {
         },
 
         updateGroupMemberCount: function(groupName) {
-            var $userPanelTitle = $('.panel.users .panel-title');
+            var $userPanelTitle = $('.card.users .card-title');
             $userPanelTitle.text(
                 $userPanelTitle.text().replace(
                     /(?:\s*\(\d+\))?$/,
@@ -279,7 +279,7 @@ $(function() {
 
             var that = this;
 
-            var $groupPanel = $('.panel.groups');
+            var $groupPanel = $('.card.groups');
             $groupPanel.find('.delete-button').toggleClass(
                 'disabled',
                 !!(!userCanManage || groupName.match(that.GROUP_PREFIXES_RESERVED_RE)
@@ -409,12 +409,12 @@ $(function() {
 
                 $userList.removeClass('hidden');
 
-                var $userPanel = $('.panel.users');
-                $userPanel.find('.panel-body:has(.placeholder-text)').addClass('hidden');
+                var $userPanel = $('.card.users');
+                $userPanel.find('.card-body:has(.placeholder-text)').addClass('hidden');
 
                 // Fix bad bootstrap borders caused by hidden elements.
-                $userPanel.find('.panel-heading').css({ borderBottom: 'none' });
-                $userPanel.find('.panel-footer').css( { borderTop:    ''     });
+                $userPanel.find('.card-header').css({ borderBottom: 'none' });
+                $userPanel.find('.card-footer').css( { borderTop:    ''     });
 
                 $userPanel.find('.create-button').removeClass('disabled');
                 $userPanel.find('.update-button, .delete-button').addClass('disabled');
@@ -429,7 +429,7 @@ $(function() {
         deselectGroup: function() {
             this.deselectUser();
 
-            var $groupPanel = $('.panel.groups');
+            var $groupPanel = $('.card.groups');
             $groupPanel.find('.delete-button').addClass('disabled');
 
             var $groupList = $('#group-list');
@@ -439,18 +439,18 @@ $(function() {
             $groupProperties.find('.placeholder-text').removeClass('hidden');
             $groupProperties.find('form').addClass('hidden');
 
-            var $userPanel = $('.panel.users');
+            var $userPanel = $('.card.users');
 
-            var $panelTitle = $userPanel.find('.panel-title');
+            var $panelTitle = $userPanel.find('.card-title');
             $panelTitle.text($panelTitle.text().replace(/\s*\(\d+\)$/, ''));
 
             $userPanel.find('#user-list-search').val('');
-            $userPanel.find('.panel-body:has(.placeholder-text)').removeClass('hidden');
+            $userPanel.find('.card-body:has(.placeholder-text)').removeClass('hidden');
             $userPanel.find('#user-list').addClass('hidden');
 
             // Fix bad bootstrap borders caused by hidden elements.
-            $userPanel.find('.panel-heading').css({ borderBottom: ''               });
-            $userPanel.find('.panel-footer').css( { borderTop:    '1px solid #ddd' });
+            $userPanel.find('.card-header').css({ borderBottom: ''               });
+            $userPanel.find('.card-footer').css( { borderTop:    '1px solid #ddd' });
 
             Yoda.storage.session.remove('selected-group');
         },
@@ -475,7 +475,7 @@ $(function() {
             $user.addClass('active');
 
             if (this.canManageGroup($('#group-list .active.group').attr('data-name'))) {
-                var $userPanel = $('.panel.users');
+                var $userPanel = $('.card.users');
 
                 var $promoteButton = $userPanel.find('.promote-button');
                 var $demoteButton  = $userPanel.find('.demote-button');
@@ -513,7 +513,7 @@ $(function() {
          * \brief Deselects the selected user, if any.
          */
         deselectUser: function() {
-            var $userPanel = $('.panel.users');
+            var $userPanel = $('.card.users');
             var $userList  = $('#user-list');
             $userList.find('.active').removeClass('active');
             $userPanel.find('.update-button, .delete-button').addClass('disabled');
@@ -1040,7 +1040,7 @@ $(function() {
          */
         removeUserDeleteConfirmationModal: function() {
             var that = this;
-            $('.users.panel .delete-button').off('click').on('click', function(e) {
+            $('.users.card .delete-button').off('click').on('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 that.onClickUserDelete(this);
@@ -1394,7 +1394,7 @@ $(function() {
 
             // Group removal.
             $('#modal-group-delete .confirm').on('click', function(e) {
-                that.onClickGroupDelete($('.groups.panel .delete-button')[0]);
+                that.onClickGroupDelete($('.groups.card .delete-button')[0]);
                 $('#modal-group-delete').modal('hide');
             });
 
@@ -1437,13 +1437,13 @@ $(function() {
             });
 
             // Changing user roles.
-            $('.users.panel .update-button').on('click', function(e) {
+            $('.users.card .update-button').on('click', function(e) {
                 that.onClickUserUpdate(this, e);
             });
 
             // Remove users from groups.
             $('#modal-user-delete .confirm').on('click', function(e) {
-                that.onClickUserDelete($('.users.panel .delete-button')[0]);
+                that.onClickUserDelete($('.users.card .delete-button')[0]);
                 $('#modal-user-delete').modal('hide');
             });
 
@@ -1459,7 +1459,7 @@ $(function() {
 
             // User list search.
             $('#user-list-search').on('keyup', function() {
-                var $users  = $('.panel.users .user');
+                var $users  = $('.card.users .user');
 
                 if ($(this).val().length) {
                     var quotedVal = Yoda.escapeQuotes($(this).val());
@@ -1477,7 +1477,7 @@ $(function() {
             $('.selectify-data-classification').select2();
 
             if (this.isMemberOfGroup('priv-group-add') || this.isRodsAdmin) {
-                var $groupPanel = $('.panel.groups');
+                var $groupPanel = $('.card.groups');
                 $groupPanel.find('.create-button').removeClass('disabled');
             }
 
