@@ -13,7 +13,7 @@ $(function() {
 		<div class="card groups">
 			<div class="card-header">
 				Yoda groups
-				<div class="input-group-sm has-feedback float-xs-right hidden">
+				<div class="input-group-sm has-feedback float-right hidden">
 					<!-- TODO: Search groups. -->
 					<input class="form-control form-control-sm" id="group-list-search" type="text" placeholder="Search groups" />
                     <i class="fa fa-search form-control-feedback" aria-hidden="true"></i>
@@ -69,10 +69,10 @@ $(function() {
 
 			</div>
 			<div class="card-footer">
-				<div class="input-group-sm float-xs-left">
+				<div class="input-group-sm float-left">
 					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/group-delete')?>" data-toggle="modal" data-target="#modal-group-delete">Remove group</a>
 				</div>
-				<div class="input-group-sm float-xs-right">
+				<div class="input-group-sm float-right">
 					<a class="btn btn-sm btn-primary create-button disabled" data-toggle="modal" data-target="#modal-group-create">Add group</a>
 				</div>
 			</div>
@@ -137,7 +137,7 @@ $(function() {
 		</div>
 		<div class="card users">
 			<div class="card-header">Group members</h3>
-				<div class="input-group-sm has-feedback float-xs-right">
+				<div class="input-group-sm has-feedback float-right">
 					<input class="form-control form-control-sm" id="user-list-search" type="text" placeholder="Search users" />
                     <i class="fa fa-search form-control-feedback" aria-hidden="true"></i>
 				</div>
@@ -164,7 +164,7 @@ $(function() {
 				</div>
 			</div>
 			<div class="card-footer">
-				<div class="input-group-sm float-xs-left">
+				<div class="input-group-sm float-left">
 					Change role:
                     <a class="btn btn-sm btn-primary disabled update-button promote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Promote the selected user">&uarr;<i class="fa fa-user-circle-o" aria-hidden="true"></i></a>
                     <a class="btn btn-sm btn-primary disabled update-button demote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Demote the selected user">&darr;<i class="fa fa-eye" aria-hidden="true"></i></i></a>
@@ -281,7 +281,7 @@ $(function() {
 				</p>
 			</div>
 			<div class="modal-footer">
-				<div class="input-group float-xs-left">
+				<div class="input-group float-left">
 					<div class="checkbox">
 						<label for="f-user-delete-no-confirm">
 							<input id="f-user-delete-no-confirm" type="checkbox" /> Don't ask again during this session.

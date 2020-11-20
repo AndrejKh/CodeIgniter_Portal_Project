@@ -304,7 +304,7 @@ $(function() {
                 $groupProperties.find('#f-group-update-subcategory')
                     .select2('data', { id: group.subcategory, text: group.subcategory })
                     .select2('readonly', !userCanManage);
-                $groupProperties.find('#f-group-update-name').siblings('.input-group-text')
+                $groupProperties.find('#inputGroupPrepend')
                     .html(function() {
                         var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
                         return matches
