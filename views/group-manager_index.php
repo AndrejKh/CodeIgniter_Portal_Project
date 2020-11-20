@@ -30,8 +30,7 @@ $(function() {
 ?>
 	<div class="list-group-item category" id="category-<?php echo $i?>" data-name="<?php echo htmlentities($category); ?>">
 		<a class="name collapsed" data-toggle="collapse" data-parent="#category-<?php echo $i?>" href="#category-<?php echo $i?>-ul">
-			<i class="glyphicon glyphicon-triangle-right triangle"></i>
-			<?php echo htmlentities($category); ?>
+			<i class="fa fa-caret-right triangle" aria-hidden="true"></i> <?php echo htmlentities($category); ?>
 		</a>
 		<div class="list-group collapse category-ul" id="category-<?php echo $i?>-ul">
 <?php
@@ -40,8 +39,7 @@ $(function() {
 ?>
 			<div class="list-group-item subcategory" data-name="<?php echo htmlentities($subcategory); ?>">
 				<a class="name collapsed" data-toggle="collapse" data-parent="#subcategory-<?php echo $j?>" href="#subcategory-<?php echo $j?>-ul">
-					<i class="glyphicon glyphicon-triangle-right triangle"></i>
-			<?php echo htmlentities($subcategory); ?>
+					<i class="fa fa-caret-right triangle" aria-hidden="true"></i> <?php echo htmlentities($subcategory); ?>
 				</a>
 
 				<div class="list-group collapse subcategory-ul" id="subcategory-<?php echo $j?>-ul">

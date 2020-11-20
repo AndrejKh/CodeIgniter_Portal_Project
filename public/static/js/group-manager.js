@@ -1242,8 +1242,8 @@ $(function() {
 
             $groupList.on('show.bs.collapse', function(e) {
                 $(e.target).parent('.list-group-item').find('.triangle').first()
-                    .removeClass('glyphicon-triangle-right')
-                       .addClass('glyphicon-triangle-bottom');
+                    .removeClass('fa-caret-right')
+                       .addClass('fa-caret-bottom');
             });
 
             $groupList.on('shown.bs.collapse', function(e) {
@@ -1260,8 +1260,8 @@ $(function() {
 
             $groupList.on('hide.bs.collapse', function(e) {
                 $(e.target).parent('.list-group-item').find('.triangle').first()
-                    .removeClass('glyphicon-triangle-bottom')
-                       .addClass('glyphicon-triangle-right');
+                    .removeClass('fa-caret-bottom')
+                       .addClass('fa-caret-right');
             });
 
             $groupList.on('click', 'a.group', function() {
