@@ -353,7 +353,7 @@ EORULE;
             'styleIncludes' => array(
                 'lib/select2/select2.css',
                 'lib/select2/select2-bootstrap.min.css',
-                'lib/font-awesome/css/font-awesome.css'
+                'lib/font-awesome/css/font-awesome.css',
                 'css/group-manager.css'
             ),
             'scriptIncludes' => array(
