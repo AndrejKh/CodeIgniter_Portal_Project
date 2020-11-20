@@ -20,7 +20,7 @@ $(function() {
         /// Group name prefixes that can be shown in the group manager.
         /// NB: To make group prefixes selectable in the group add dialog, the
         /// view phtml must be edited.
-        GROUP_PREFIXES_RE:          /^(grp-|priv-|intake-|vault-|research-|datamanager-)/,
+        GROUP_PREFIXES_RE:          /^(grp-|priv-|intake-|vault-|research-|datamanager-|datarequests-)/,
 
         /// A subset of GROUP_PREFIXES_RE that cannot be selected for group creation, and that cannot be deleted.
         GROUP_PREFIXES_RESERVED_RE: /^(priv-|vault-)/,
@@ -403,7 +403,7 @@ $(function() {
                 // Move the user creation item to the bottom of the list.
                 var $userCreateItem = $userList.find('.item-user-create');
                 $userCreateItem.appendTo($userList);
-                $userCreateItem.toggleClass('hidden', !that.canManageGroup(groupName));
+                $userCreateItem.attr('hidden', !that.canManageGroup(groupName));
 
                 $userList.find('#f-user-create-group').val(groupName);
 
@@ -1418,16 +1418,16 @@ $(function() {
             $userList.on('click', '.list-group-item:has(.user-create-text:not(.hidden))', function() {
                 // Show the user add form.
                 that.deselectUser();
-                $(this).find('.user-create-text').addClass('hidden');
-                $(this).find('form').removeClass('hidden');
+                $(this).find('.user-create-text').attr('hidden', 'true');
+                $(this).find('form').attr('hidden', 'false');
                 $(this).find('form').find('#f-user-create-name').select2('open');
             });
 
             $('#f-user-create-name').on('select2-close', function() {
                 // Remove the new user name input on unfocus if nothing was entered.
                 if ($(this).val().length === 0) {
-                    $(this).parents('form').addClass('hidden');
-                    $(this).parents('.list-group-item').find('.user-create-text').removeClass('hidden');
+                    $(this).parents('form').attr('hidden', 'true');
+                    $(this).parents('.list-group-item').find('.user-create-text').attr('hidden', 'false');
                 }
             });
 
