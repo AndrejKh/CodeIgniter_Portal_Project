@@ -145,9 +145,9 @@ $(function() {
 					Please select a group.
 				</p>
 			</div>
-			<div class="list-group hidden" id="user-list">
+			<div class="list-group" id="user-list">
 				<div class="list-group-item item-user-create">
-					<a class="user-create-text" href="#" onclick="return false;">
+					<a class="user-create-text" href="#" onclick="return false;" hidden>
 						Click here to add a new user to this group
 					</a>
 					<form action="<?php echo base_url('group-manager/user-create')?>" method="POST" class="form-inline" id="f-user-create" hidden>

@@ -407,8 +407,6 @@ $(function() {
 
                 $userList.find('#f-user-create-group').val(groupName);
 
-                $userList.removeClass('hidden');
-
                 var $userPanel = $('.card.users');
                 $userPanel.find('.card-body:has(.placeholder-text)').addClass('hidden');
 
@@ -1010,7 +1008,7 @@ $(function() {
 
                     $(el).find('#f-user-create-name').select2('val', '');
                     $(el).addClass('hidden');
-                    $(el).parents('.list-group-item').find('.user-create-text').removeClass('hidden');
+                    $(el).parents('.list-group-item').find('.user-create-text').removeAttr('hidden');
 
                     that.deselectGroup();
                     that.selectGroup(groupName);
