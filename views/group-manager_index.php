@@ -150,7 +150,7 @@ $(function() {
 					<a class="user-create-text" href="#" onclick="return false;">
 						Click here to add a new user to this group
 					</a>
-					<form action="<?php echo base_url('group-manager/user-create')?>" method="POST" class="form-inline hidden" id="f-user-create">
+					<form action="<?php echo base_url('group-manager/user-create')?>" method="POST" class="form-inline" id="f-user-create" hidden>
 						<input name="group_name" id="f-user-create-group" type="hidden" />
 						<div class="input-group" style="width: 100%;">
 							<input name="user_name" id="f-user-create-name" class="form-control form-control-sm selectify-user-name" type="hidden" required placeholder="Enter a username" data-group="#f-user-create-group" />

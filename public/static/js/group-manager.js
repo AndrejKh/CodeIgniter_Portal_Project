@@ -1418,8 +1418,8 @@ $(function() {
             $userList.on('click', '.list-group-item:has(.user-create-text:not(.hidden))', function() {
                 // Show the user add form.
                 that.deselectUser();
-                $(this).find('.user-create-text').attr('hidden', 'true');
-                $(this).find('form').attr('hidden', 'false');
+                $(this).find('.user-create-text').attr('hidden', '');
+                $(this).find('form').removeAttr('hidden');
                 $(this).find('form').find('#f-user-create-name').select2('open');
             });
 
@@ -1427,7 +1427,7 @@ $(function() {
                 // Remove the new user name input on unfocus if nothing was entered.
                 if ($(this).val().length === 0) {
                     $(this).parents('form').attr('hidden', 'true');
-                    $(this).parents('.list-group-item').find('.user-create-text').attr('hidden', 'false');
+                    $(this).parents('.list-group-item').find('.user-create-text').removeAttr('hidden');
                 }
             });
 
