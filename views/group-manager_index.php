@@ -16,7 +16,6 @@ $(function() {
 				<div class="input-group-sm has-feedback float-right hidden">
 					<!-- TODO: Search groups. -->
 					<input class="form-control form-control-sm" id="group-list-search" type="text" placeholder="Search groups" />
-                    <i class="fa fa-search form-control-feedback" aria-hidden="true"></i>
 				</div>
 			</div>
 			<div class="list-group" id="group-list">
@@ -139,7 +138,6 @@ $(function() {
 			<div class="card-header">Group members</h3>
 				<div class="input-group-sm has-feedback float-right">
 					<input class="form-control form-control-sm" id="user-list-search" type="text" placeholder="Search users" />
-                    <i class="fa fa-search form-control-feedback" aria-hidden="true"></i>
 				</div>
 			</div>
 			<div class="card-body">
