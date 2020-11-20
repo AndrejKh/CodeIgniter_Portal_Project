@@ -45,9 +45,9 @@ $(function() {
 
         /// Icon classes for access levels.
         accessIcons: {
-            'reader':  'glyphicon-eye-open',
-            'normal':  'glyphicon-user',
-            'manager': 'glyphicon-tower',
+            'reader':  'fa-eye',
+            'normal':  'fa-user',
+            'manager': 'fa-user-circle-o',
         },
 
         /// Human-readable descriptions of access levels.
@@ -390,9 +390,9 @@ $(function() {
                     if (nameAndZone[1] == that.zone)
                         displayName = nameAndZone[0];
 
-                    $user.html('<i class="glyphicon '
+                    $user.html('<i class="fa '
                                + that.accessIcons[user.access]
-                               + '" title="'
+                               + '" aria-hidden="true" title="'
                                + that.accessNames[user.access]
                                + '"></i> '
                                + Yoda.escapeEntities(displayName));
@@ -491,13 +491,13 @@ $(function() {
                 var nextAccess = this.nextAccessLevel(selectedUser.access, selectedGroupName);
 
                 if (prevAccess) {
-                    $demoteButton.find('i').addClass('glyphicon ' + this.accessIcons[prevAccess]);
+                    $demoteButton.find('i').addClass('fa ' + this.accessIcons[prevAccess]);
                     $demoteButton.removeClass('disabled');
                     $demoteButton.attr('data-target-role', prevAccess);
                     demoteTitle += ' to ' + this.accessNames[prevAccess].toLowerCase();
                 }
                 if (nextAccess) {
-                    $promoteButton.find('i').addClass('glyphicon ' + this.accessIcons[nextAccess]);
+                    $promoteButton.find('i').addClass('fa ' + this.accessIcons[nextAccess]);
                     $promoteButton.removeClass('disabled');
                     $promoteButton.attr('data-target-role', nextAccess);
                     promoteTitle += ' to ' + this.accessNames[nextAccess].toLowerCase();
@@ -1243,7 +1243,7 @@ $(function() {
             $groupList.on('show.bs.collapse', function(e) {
                 $(e.target).parent('.list-group-item').find('.triangle').first()
                     .removeClass('fa-caret-right')
-                       .addClass('fa-caret-bottom');
+                       .addClass('fa-caret-down');
             });
 
             $groupList.on('shown.bs.collapse', function(e) {
@@ -1260,7 +1260,7 @@ $(function() {
 
             $groupList.on('hide.bs.collapse', function(e) {
                 $(e.target).parent('.list-group-item').find('.triangle').first()
-                    .removeClass('fa-caret-bottom')
+                    .removeClass('fa-caret-down')
                        .addClass('fa-caret-right');
             });
 
