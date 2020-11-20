@@ -1485,15 +1485,15 @@ $(function() {
             for (var groupName in this.groups) {
                 if (this.isManagerOfGroup(groupName)) {
                     $('#group-list .group[data-name="' + Yoda.escapeQuotes(groupName) + '"]').append(
-                        '<span class="pull-right glyphicon glyphicon-tower" title="You manage this group"></span>'
+                        '<i class="pull-right fa fa-user-circle-o" title="You manage this group"></i>'
                     );
                 } else if (!this.isMemberOfGroup(groupName) && this.isRodsAdmin) {
                     $('#group-list .group[data-name="' + Yoda.escapeQuotes(groupName) + '"]').append(
-                        '<span class="pull-right glyphicon glyphicon-wrench" title="You are not a member of this group, but you can manage it as an iRODS administrator."></span>'
+                        '<i class="pull-right fa fa-wrench" title="You are not a member of this group, but you can manage it as an iRODS administrator."></i>'
                     );
                 } else if (this.groups[groupName].members[this.userNameFull].access == 'reader') {
                     $('#group-list .group[data-name="' + Yoda.escapeQuotes(groupName) + '"]').append(
-                        '<span class="pull-right glyphicon glyphicon-eye-open" title="You have read access to this group"></span>'
+                        '<i class="pull-right fa fa-eye" title="You have read access to this group"></i>'
                     );
                 }
             }
