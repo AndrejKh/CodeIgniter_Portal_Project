@@ -304,7 +304,7 @@ $(function() {
                 $groupProperties.find('#f-group-update-subcategory')
                     .select2('data', { id: group.subcategory, text: group.subcategory })
                     .select2('readonly', !userCanManage);
-                $groupProperties.find('#f-group-update-name').siblings('.input-group-addon')
+                $groupProperties.find('#f-group-update-name').siblings('.input-group-text')
                     .html(function() {
                         var matches = groupName.match(that.GROUP_PREFIXES_RE, '');
                         return matches
@@ -340,7 +340,7 @@ $(function() {
                         .val(group.data_classification).trigger('change');
 
                 $groupProperties.find('#f-group-update-submit')
-                    .toggleClass('hidden', !userCanManage);
+                    .attr('hidden', !userCanManage);
             })();
 
             // }}}

@@ -102,9 +102,9 @@ $(function() {
 						<label class="col-sm-4 col-form-label" for="f-group-update-name">Group name</label>
 						<div class="col-sm-8">
 							<div class="input-group">
-								<div class="input-group-addon">
-									grp-
-								</div>
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inputGroupPrepend">grp-</span>
+                                </div>
 								<input name="group_name" id="f-group-update-name" class="form-control" type="text" pattern="^([a-z0-9]|[a-z0-9][a-z0-9-]*[a-z0-9])$" required oninvalid="setCustomValidity('Please enter only lowercase letters, numbers, and hyphens (-). The group name may not start or end with a hyphen.')" onchange="setCustomValidity('')" />
 							</div>
 						</div>
