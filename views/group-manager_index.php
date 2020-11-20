@@ -16,7 +16,7 @@ $(function() {
 				<div class="input-group-sm has-feedback float-xs-right hidden">
 					<!-- TODO: Search groups. -->
 					<input class="form-control form-control-sm" id="group-list-search" type="text" placeholder="Search groups" />
-					<i class="glyphicon glyphicon-search form-control-feedback"></i>
+                    <i class="fa fa-search form-control-feedback" aria-hidden="true"></i>
 				</div>
 			</div>
 			<div class="list-group" id="group-list">
@@ -86,20 +86,20 @@ $(function() {
 					Please select a group.
 				</p>
 				<form action="<?php echo base_url('group-manager/group-update')?>" method="POST" class=" hidden" id="f-group-update">
-					<div class="form-group">
-						<label class="col-sm-4 form-control-label" for="f-group-update-category">Category</label>
+					<div class="form-group row">
+						<label class="col-sm-4 col-form-label" for="f-group-update-category">Category</label>
 						<div class="col-sm-8">
 							<input name="group_category" id="f-group-update-category" class="form-control selectify-category" type="hidden" placeholder="Select one or enter a new name" required data-subcategory="#f-group-update-subcategory" />
 						</div>
 					</div>
-					<div class="form-group">
-						<label class="col-sm-4 form-control-label" for="f-group-update-subcategory">Subcategory</label>
+					<div class="form-group row">
+						<label class="col-sm-4 col-form-label" for="f-group-update-subcategory">Subcategory</label>
 						<div class="col-sm-8">
 							<input name="group_subcategory" id="f-group-update-subcategory" class="form-control selectify-subcategory" type="hidden" placeholder="Select one or enter a new name" required data-category="#f-group-update-category" />
 						</div>
 					</div>
-					<div class="form-group">
-						<label class="col-sm-4 form-control-label" for="f-group-update-name">Group name</label>
+					<div class="form-group row">
+						<label class="col-sm-4 col-form-label" for="f-group-update-name">Group name</label>
 						<div class="col-sm-8">
 							<div class="input-group">
 								<div class="input-group-addon">
@@ -109,8 +109,8 @@ $(function() {
 							</div>
 						</div>
 					</div>
-					<div class="form-group data-classification">
-						<label class="col-sm-4 form-control-label" for="f-group-update-data-classification">Data classification</label>
+					<div class="form-group row data-classification">
+						<label class="col-sm-4 col-form-label" for="f-group-update-data-classification">Data classification</label>
 						<div class="col-sm-8">
 							<select name="group_data_classification" id="f-group-update-data-classification" class="selectify-data-classification">
 								<option value="unspecified" class="unspecified-option">Unspecified</option>
@@ -121,13 +121,13 @@ $(function() {
 							</select>
 						</div>
 					</div>
-					<div class="form-group">
-						<label class="col-sm-4 form-control-label" for="f-group-update-description">Group description</label>
+					<div class="form-group row">
+						<label class="col-sm-4 col-form-label" for="f-group-update-description">Group description</label>
 						<div class="col-sm-8">
 							<input name="group_description" id="f-group-update-description" class="form-control" type="text" placeholder="Enter a short description" pattern="^[a-zA-Z0-9,.()_ -]*$" oninvalid="setCustomValidity('Please enter only letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).')" onchange="setCustomValidity('')" />
 						</div>
 					</div>
-					<div class="form-group">
+					<div class="form-group row">
 						<div class="offset-sm-4 col-sm-8">
 							<input id="f-group-update-submit" class="btn btn-primary" type="submit" value="Update" />
 						</div>
@@ -139,7 +139,7 @@ $(function() {
 			<div class="card-header">Group members</h3>
 				<div class="input-group-sm has-feedback float-xs-right">
 					<input class="form-control form-control-sm" id="user-list-search" type="text" placeholder="Search users" />
-					<i class="glyphicon glyphicon-search form-control-feedback"></i>
+                    <i class="fa fa-search form-control-feedback" aria-hidden="true"></i>
 				</div>
 			</div>
 			<div class="card-body">
@@ -166,8 +166,8 @@ $(function() {
 			<div class="card-footer">
 				<div class="input-group-sm float-xs-left">
 					Change role:
-                    <a class="btn btn-sm btn-primary disabled update-button promote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Promote the selected user">&uarr;<i class="glyphicon glyphicon-tower"></i></a>
-                    <a class="btn btn-sm btn-primary disabled update-button demote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Demote the selected user">&darr;<i class="glyphicon glyphicon-eye-open"></i></a>
+                    <a class="btn btn-sm btn-primary disabled update-button promote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Promote the selected user">&uarr;<i class="fa fa-user-circle-o" aria-hidden="true"></i></a>
+                    <a class="btn btn-sm btn-primary disabled update-button demote-button" data-action="<?php echo base_url('group-manager/user-update')?>" title="Demote the selected user">&darr;<i class="fa fa-eye" aria-hidden="true"></i></i></a>
 
 					<a class="btn btn-sm btn-danger disabled delete-button" data-action="<?php echo base_url('group-manager/user-delete')?>" data-toggle="modal" data-target="#modal-user-delete" title="Remove the selected user from this group">Remove user</a>
 				</div>
