@@ -177,26 +177,28 @@ $(function() {
 <div class="modal fade" id="modal-group-create" tabindex="-1" role="dialog">
 	<div class="modal-dialog">
 		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-				<h4 class="modal-title">Create a group</h4>
-			</div>
+            <div class="modal-header">
+              <h5 class="modal-title">Create a group</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
 			<div class="modal-body">
 				<form class="form-horizontal" id="f-group-create" action="<?php echo base_url('group-manager/group-create')?>" method="POST">
-					<div class="form-group">
+					<div class="form-group row">
 						<label class="col-sm-4 form-control-label" for="f-group-create-category">Category</label>
 						<div class="col-sm-8">
 							<input name="group_category" id="f-group-create-category" class="form-control selectify-category" type="hidden" placeholder="Select one or enter a new name" required data-subcategory="#f-group-create-subcategory" />
 						</div>
 					</div>
-					<div class="form-group">
+					<div class="form-group row">
 						<label class="col-sm-4 form-control-label" for="f-group-create-subcategory">Subcategory</label>
 						<div class="col-sm-8">
 							<input name="group_subcategory" id="f-group-create-subcategory" class="form-control selectify-subcategory" type="hidden" placeholder="Select one or enter a new name" required data-category="#f-group-create-category" />
 						</div>
 					</div>
 					<hr />
-					<div class="form-group">
+					<div class="form-group row">
 						<label class="col-sm-4 form-control-label" for="f-group-create-name">Group name</label>
 						<div class="col-sm-8">
 							<div class="input-group">
@@ -214,7 +216,7 @@ $(function() {
 							</div>
 						</div>
 					</div>
-					<div class="form-group data-classification">
+					<div class="form-group row data-classification">
 						<label class="col-sm-4 form-control-label" for="f-group-create-data-classification">Data classification</label>
 						<div class="col-sm-8">
 							<select name="group_data_classification" id="f-group-create-data-classification" class="selectify-data-classification">
@@ -226,16 +228,16 @@ $(function() {
 							</select>
 						</div>
 					</div>
-					<div class="form-group">
+					<div class="form-group row">
 						<label class="col-sm-4 form-control-label" for="f-group-create-description">Group description</label>
 						<div class="col-sm-8">
 							<input name="group_description" id="f-group-create-description" class="form-control" type="text" placeholder="Enter a short description" pattern="^[a-zA-Z0-9,.()_ -]*$" oninvalid="setCustomValidity('Please enter only letters a-z, numbers, spaces, comma\'s, periods, parentheses, underscores (_) and hyphens (-).')" onchange="setCustomValidity('')" />
 						</div>
 					</div>
-					<div class="form-group">
+					<div class="form-group row">
 						<div class="offset-sm-4 col-sm-8">
-							<input id="f-group-create-submit" class="btn btn-primary" type="submit" value="Add group" />
-							<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <input id="f-group-create-submit" class="btn btn-primary" type="submit" value="Add group" />
 						</div>
 					</div>
 				</form>
@@ -243,40 +245,39 @@ $(function() {
 		</div>
 	</div>
 </div>
-<div class="modal fade" id="modal-group-delete" tabindex="-1" role="dialog">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-				<h4 class="modal-title">Confirm group removal</h4>
-			</div>
-			<div class="modal-body">
-				<p>
-					Are you sure you want to remove <strong class="group"></strong>?
-				</p>
-				<p>
-					Please make sure that the group's directory is empty before continuing.
-				</p>
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-danger confirm">Remove</button>
-				<button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-			</div>
-		</div>
-	</div>
+
+<div class="modal fade" id="modal-group-delete" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm group removal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <p>Are you sure you want to remove <strong class="group"></strong>?</p>
+          <p>Please make sure that the group's directory is empty before continuing.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger confirm">Remove</button>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="modal fade" id="modal-user-delete" tabindex="-1" role="dialog">
+
+<div class="modal fade" id="modal-user-delete" tabindex="-1">
 	<div class="modal-dialog">
 		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-				<h4 class="modal-title">Confirm user removal</h4>
-			</div>
+            <div class="modal-header">
+              <h5 class="modal-title">Confirm user removall</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
 			<div class="modal-body">
-				<p>
-					Are you sure you want to remove <strong class="user"></strong>
-					from group <strong class="group"></strong>?
-				</p>
+				<p>Are you sure you want to remove <strong class="user"></strong> from group <strong class="group"></strong>?</p>
 			</div>
 			<div class="modal-footer">
 				<div class="input-group float-left">
@@ -287,8 +288,8 @@ $(function() {
 					</div>
 				</div>
 
-				<button class="btn btn-danger confirm">Remove</button>
-				<button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger confirm">Remove</button>
 			</div>
 		</div>
 	</div>
