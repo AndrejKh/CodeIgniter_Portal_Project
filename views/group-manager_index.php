@@ -46,7 +46,7 @@ $(function() {
 			ksort($groups);
 			foreach ($groups as $group => $properties) {
 ?>
-					<a class="list-group-item group" id="group-<?php echo $k?>" data-name="<?php echo htmlentities($group); ?>">
+					<a class="list-group-item list-group-item-action group" id="group-<?php echo $k?>" data-name="<?php echo htmlentities($group); ?>">
 						<?php echo htmlentities($group); ?>
 					</a>
 <?php
