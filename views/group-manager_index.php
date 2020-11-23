@@ -137,7 +137,7 @@ $(function() {
 		<div class="card users">
 			<div class="card-header">Group members</h3>
 				<div class="input-group-sm has-feedback float-right">
-					<input class="form-control form-control-sm" id="user-list-search" type="text" placeholder="Search users" />
+					<input class="form-control form-control-sm mt-1" id="user-list-search" type="text" placeholder="Search users" />
 				</div>
 			</div>
 			<div class="card-body">
