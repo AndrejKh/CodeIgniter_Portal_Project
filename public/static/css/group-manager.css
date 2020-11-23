@@ -27,11 +27,6 @@ i.form-control-feedback.glyphicon {
 	width: 100%;
 }
 
-.card > .list-group .list-group .list-group-item {
-	border-top:    1px solid #ddd;
-	border-bottom: 1px solid #ddd;
-}
-
 .card > .list-group .list-group {
 	margin-top: 0;
 	margin-bottom: 0;

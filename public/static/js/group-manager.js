@@ -372,7 +372,7 @@ $(function() {
                     // Loop through the sorted user list and generate the #userList element.
                     var user = users[userName];
 
-                    var $user = $('<a class="list-group-item user">');
+                    var $user = $('<a class="list-group-item list-group-item-action user">');
                     $user.attr('id', 'user-' + i);
                     $user.addClass('user-access-' + user.access);
                     $user.attr('data-name', userName);
