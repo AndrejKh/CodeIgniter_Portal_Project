@@ -3,7 +3,7 @@
  * \file
  * \brief     Yoda Group Manager frontend styling.
  * \author    Chris Smeele
- * \copyright Copyright (c) 2015, Utrecht university. All rights reserved
+ * \copyright Copyright (c) 2015-2020, Utrecht university. All rights reserved
  * \license   GPLv3, see LICENSE
  */
 
@@ -12,11 +12,6 @@
 }
 .card-footer .input-group-sm {
 	margin: -6px; /* Search box */
-}
-
-.grey,
-i.form-control-feedback.glyphicon {
-	color: #aaa;
 }
 
 .select2-highlighted .grey {
@@ -71,10 +66,6 @@ i.form-control-feedback.glyphicon {
 }
 
 #group-list {
-	/*
-	min-height: 320px;
-	max-height: 320px;
-	*/
 	overflow: auto;
 }
 
@@ -93,10 +84,6 @@ i.form-control-feedback.glyphicon {
 
 #user-list .user .glyphicon {
 	padding-right: 8px;
-}
-
-#user-list .disabled.self {
-	cursor: default;
 }
 
 #user-list .self:after {
