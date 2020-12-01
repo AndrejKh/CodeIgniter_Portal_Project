@@ -24,7 +24,7 @@ class Group_Manager extends MY_Controller {
             $result = $this->api->call('group_data');
         } else {
             $result = $this->api->call('group_data_filtered',
-                                       ['user_name' => $this->rodsuser->getUserInfo()['name'],
+                                       ['username' => $this->rodsuser->getUserInfo()['name'],
                                         'zone_name' => $this->rodsuser->getUserInfo()['zone']]);
         }
         return $result->data;
@@ -41,24 +41,9 @@ class Group_Manager extends MY_Controller {
     }
 
     protected function _findUsers($query) {
-        $ruleBody = <<<EORULE
-rule {
-	uuFindUsers(*query, *userList);
-	uuJoin(',', *userList, *users);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*query' => $query,
-            ),
-            array(
-                '*users',
-            )
-        );
-        $result = $rule->execute();
-        return explodeProperly(',', $result['*users']);
+        $result = $this->api->call('group_search_users',
+                                      ['pattern' => $query]);
+        return $result->data;
     }
 
     protected function _getGroupHierarchy() {
@@ -150,36 +135,21 @@ EORULE;
     }
 
     public function groupCreate() {
-        $ruleBody = <<<EORULE
-rule {
-	uuGroupAdd(*groupName, *category, *subcategory, *description, *dataClassification, *statusInt, *message);
-	*status = str(*statusInt);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*groupName'           => $this->input->post('group_name'),
-                '*category'            => $this->input->post('group_category'),
-                '*subcategory'         => $this->input->post('group_subcategory'),
-                '*description'         => $this->input->post('group_description'),
-                '*dataClassification'  => in_array('group_data_classification', array_keys($this->input->post()))
-                                          ? $this->input->post('group_data_classification')
-                                          : '', // Only research and intake groups will have a data classification parameter.
-            ),
-            array(
-                '*status',
-                '*message',
-            )
-        );
-        $result = $rule->execute();
+        $result = $this->api->call('group_create',
+                                   ['group_name'             => $this->input->post('group_name'),
+                                    'category'              => $this->input->post('group_category'),
+                                    'subcategory'           => $this->input->post('group_subcategory'),
+                                    'description'           => $this->input->post('group_description'),
+                                    'data_classification'    =>  in_array('group_data_classification', array_keys($this->input->post()))
+                                                                ? $this->input->post('group_data_classification')
+                                                                : '', // Only research and intake groups will have a data classification parameter.
+                                   ]);
 
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode(array(
-                'status'  => (int)$result['*status'],
-                'message' =>      $result['*message'],
+                'status'  => (int)$result->status,
+                'message' =>      $result->status_info,
             )));
     }
 
@@ -193,158 +163,80 @@ EORULE;
         $result = array();
 
         foreach ($toSet as $property => $value) {
-            $ruleBody = <<<EORULE
-rule {
-	uuGroupModify(*groupName, *property, *value, *statusInt, *message);
-	*status = str(*statusInt);
-}
-EORULE;
-            $rule = new ProdsRule(
-                $this->rodsuser->getRodsAccount(),
-                $ruleBody,
-                array(
-                    '*groupName' => $this->input->post('group_name'),
-                    '*property'  => $property,
-                    '*value'     => $value,
-                ),
-                array(
-                    '*status',
-                    '*message',
-                )
-            );
-            $result = $rule->execute();
+            $result = $this->api->call('group_update',
+                                       ['group_name'     => $this->input->post('group_name'),
+                                        'property_name'  => $property,
+                                        'property_value' => $value]);
 
-            if ($result['*status'] > 0)
+            if ($result->status > 0)
                 break;
         }
 
-        if (!count($toSet))
-            $result = array(
-                '*status'  => 0,
-                '*message' => '',
-            );
+        if (!count($toSet)) {
+            $status         = 0;
+            $status_info    = '';
+        } else {
+            $status         = $result->status;
+            $status_info    = $result->status_info;
+        }
 
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode(array(
-                'status'  => (int)$result['*status'],
-                'message' =>      $result['*message'],
+                'status'  => (int)$status,
+                'message' =>      $status_info,
             )));
     }
 
     public function groupDelete() {
-        $ruleBody = <<<EORULE
-rule {
-	uuGroupRemove(*groupName, *statusInt, *message);
-	*status = str(*statusInt);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*groupName' => $this->input->post('group_name'),
-            ),
-            array(
-                '*status',
-                '*message',
-            )
-        );
-        $result = $rule->execute();
-
+        $result = $this->api->call('group_delete',
+                                  ['group_name' => $this->input->post('group_name')]);
+                                  
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode(array(
-                'status'  => (int)$result['*status'],
-                'message' =>      $result['*message'],
+                'status'  => (int)$result->status,
+                'message' =>      $result->status_info,
             )));
     }
 
     public function userCreate() {
-        $ruleBody = <<<EORULE
-rule {
-	uuGroupUserAdd(*groupName, *userName, *statusInt, *message);
-	*status = str(*statusInt);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*groupName' => $this->input->post('group_name'),
-                '*userName'  => $this->input->post('user_name'),
-            ),
-            array(
-                '*status',
-                '*message',
-            )
-        );
-        $result = $rule->execute();
+        $result = $this->api->call('group_user_add',
+                                   ['username'  => $this->input->post('user_name')
+                                   ,'group_name' => $this->input->post('group_name')]);
 
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode(array(
-                'status'  => (int)$result['*status'],
-                'message' =>      $result['*message'],
+                'status'  => (int)$result->status,
+                'message' =>      $result->status_info,
             )));
     }
 
     public function userUpdate() {
-        $ruleBody = <<<EORULE
-rule {
-	uuGroupUserChangeRole(*groupName, *userName, *newRole, *statusInt, *message);
-	*status = str(*statusInt);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*groupName' => $this->input->post('group_name'),
-                '*userName'  => $this->input->post('user_name'),
-                '*newRole'   => $this->input->post('new_role'),
-            ),
-            array(
-                '*status',
-                '*message',
-            )
-        );
-        $result = $rule->execute();
+        $result = $this->api->call('group_user_update_role',
+                                   ['username'  => $this->input->post('user_name')
+                                   ,'group_name' => $this->input->post('group_name')
+                                   ,'new_role'   => $this->input->post('new_role')]);
 
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode(array(
-                'status'  => (int)$result['*status'],
-                'message' =>      $result['*message'],
+                'status'  => (int)$result->status,
+                'message' =>      $result->status_info,
             )));
     }
 
     public function userDelete() {
-        $ruleBody = <<<EORULE
-rule {
-	uuGroupUserRemove(*groupName, *userName, *statusInt, *message);
-	*status = str(*statusInt);
-}
-EORULE;
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            $ruleBody,
-            array(
-                '*groupName' => $this->input->post('group_name'),
-                '*userName'  => $this->input->post('user_name'),
-            ),
-            array(
-                '*status',
-                '*message',
-            )
-        );
-        $result = $rule->execute();
+        $result = $this->api->call('group_remove_user_from_group',
+                                   ['username'  =>$this->input->post('user_name')
+                                   ,'group_name' => $this->input->post('group_name')]);
 
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode(array(
-                'status'  => (int)$result['*status'],
-                'message' =>      $result['*message'],
+                'status'  => (int)$result->status,
+                'message' =>      $result->status_info,
             )));
     }
 
