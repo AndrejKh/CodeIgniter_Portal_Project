@@ -24,7 +24,7 @@ class Group_Manager extends MY_Controller {
             $result = $this->api->call('group_data');
         } else {
             $result = $this->api->call('group_data_filtered',
-                                       ['user_name' => $this->rodsuser->getUserInfo()['name'],
+                                       ['username' => $this->rodsuser->getUserInfo()['name'],
                                         'zone_name' => $this->rodsuser->getUserInfo()['zone']]);
         }
         return $result->data;
@@ -136,11 +136,11 @@ class Group_Manager extends MY_Controller {
 
     public function groupCreate() {
         $result = $this->api->call('group_create',
-                                   ['groupName'             => $this->input->post('group_name'),
+                                   ['group_name'             => $this->input->post('group_name'),
                                     'category'              => $this->input->post('group_category'),
                                     'subcategory'           => $this->input->post('group_subcategory'),
                                     'description'           => $this->input->post('group_description'),
-                                    'dataClassification'    =>  in_array('group_data_classification', array_keys($this->input->post()))
+                                    'data_classification'    =>  in_array('group_data_classification', array_keys($this->input->post()))
                                                                 ? $this->input->post('group_data_classification')
                                                                 : '', // Only research and intake groups will have a data classification parameter.
                                    ]);
@@ -164,9 +164,9 @@ class Group_Manager extends MY_Controller {
 
         foreach ($toSet as $property => $value) {
             $result = $this->api->call('group_update',
-                                       ['groupName'     => $this->input->post('group_name'),
-                                        'propertyName'  => $property,
-                                        'propertyValue' => $value]);
+                                       ['group_name'     => $this->input->post('group_name'),
+                                        'property_name'  => $property,
+                                        'property_value' => $value]);
 
             if ($result->status > 0)
                 break;
@@ -190,7 +190,7 @@ class Group_Manager extends MY_Controller {
 
     public function groupDelete() {
         $result = $this->api->call('group_delete',
-                                  ['groupName' => $this->input->post('group_name')]);
+                                  ['group_name' => $this->input->post('group_name')]);
                                   
         $this->output
             ->set_content_type('application/json')
@@ -203,7 +203,7 @@ class Group_Manager extends MY_Controller {
     public function userCreate() {
         $result = $this->api->call('group_user_add',
                                    ['username'  => $this->input->post('user_name')
-                                   ,'groupName' => $this->input->post('group_name')]);
+                                   ,'group_name' => $this->input->post('group_name')]);
 
         $this->output
             ->set_content_type('application/json')
@@ -216,8 +216,8 @@ class Group_Manager extends MY_Controller {
     public function userUpdate() {
         $result = $this->api->call('group_user_update_role',
                                    ['username'  => $this->input->post('user_name')
-                                   ,'groupName' => $this->input->post('group_name')
-                                   ,'newRole'   => $this->input->post('new_role')]);
+                                   ,'group_name' => $this->input->post('group_name')
+                                   ,'new_role'   => $this->input->post('new_role')]);
 
         $this->output
             ->set_content_type('application/json')
@@ -230,7 +230,7 @@ class Group_Manager extends MY_Controller {
     public function userDelete() {
         $result = $this->api->call('group_remove_user_from_group',
                                    ['username'  =>$this->input->post('user_name')
-                                   ,'groupName' => $this->input->post('group_name')]);
+                                   ,'group_name' => $this->input->post('group_name')]);
 
         $this->output
             ->set_content_type('application/json')
